@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>省钱大计 - 理性消费助手</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f4f6f8; margin: 0; padding: 15px; color: #333; }
+    .container { max-width: 500px; margin: 0 auto; }
+    h1 { text-align: center; color: #1976d2; font-size: 22px; margin-bottom: 15px; }
+    
+    /* 卡片通用样式 */
+    .card { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    
+    /* 表单样式 */
+    .form-group { margin-bottom: 10px; }
+    .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 4px; }
+    .form-group input, .form-group select { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+    .form-row { display: flex; gap: 10px; }
+    .btn-add { width: 100%; padding: 10px; background: #2196f3; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+    
+    /* 概览面板 */
+    .summary { display: flex; justify-content: space-around; text-align: center; background: linear-gradient(135deg, #1e88e5, #1565c0); color: #fff; }
+    .summary div span { display: block; }
+    .summary-num { font-size: 18px; font-weight: bold; }
+    .summary-label { font-size: 12px; opacity: 0.8; }
+    
+    /* 物品列表 */
+    .item-card { display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #2196f3; }
+    .item-info { flex: 1; }
+    .item-name { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
+    .item-tag { font-size: 11px; background: #e3f2fd; color: #1976d2; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: normal; }
+    .item-sub { font-size: 12px; color: #777; }
+    .item-cost { text-align: right; margin-right: 12px; }
+    .cost-num { font-size: 18px; font-weight: bold; color: #e53935; }
+    .cost-unit { font-size: 11px; color: #888; }
+    
+    .btn-use { background: #4caf50; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+    .btn-del { background: none; border: none; color: #ccc; font-size: 12px; cursor: pointer; margin-left: 5px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🐷 省钱大计</h1>
+
+  <!-- 顶部统计 -->
+  <div class="card summary">
+    <div>
+      <span class="summary-num" id="totalSpent">￥0</span>
+      <span class="summary-label">累计投入</span>
+    </div>
+    <div>
+      <span class="summary-num" id="totalCount">0</span>
+      <span class="summary-label">录入物品数</span>
+    </div>
+  </div>
+
+  <!-- 添加新物品表单 -->
+  <div class="card">
+    <div class="form-group">
+      <label>物品名称</label>
+      <input type="text" id="name" placeholder="例如：蓝牙耳机">
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;">
+        <label>分类</label>
+        <select id="category">
+          <option>数码家电</option>
+          <option>服饰鞋包</option>
+          <option>生活用品</option>
+          <option>美妆护肤</option>
+          <option>其他</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label>价格 (元)</label>
+        <input type="number" id="price" placeholder="0.00">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;">
+        <label>已用次数</label>
+        <input type="number" id="count" value="1">
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label>购入日期</label>
+        <input type="date" id="purchaseDate">
+      </div>
+    </div>
+    <button class="btn-add" onclick="addItem()">保存并加入记录</button>
+  </div>
+
+  <!-- 物品列表区 -->
+  <div id="itemList"></div>
+</div>
+
+<script>
+  // 初始化购入日期默认为今天
+  document.getElementById('purchaseDate').valueAsDate = new Date();
+
+  // 从本地读取数据
+  function getItems() {
+    return JSON.parse(localStorage.getItem('sqdj_items') || '[]');
+  }
+
+  // 保存数据到本地
+  function saveItems(items) {
+    localStorage.setItem('sqdj_items', JSON.stringify(items));
+    render();
+  }
+
+  // 添加物品
+  function addItem() {
+    const name = document.getElementById('name').value.trim();
+    const category = document.getElementById('category').value;
+    const price = parseFloat(document.getElementById('price').value) || 0;
+    const count = parseInt(document.getElementById('count').value) || 1;
+    const purchaseDate = document.getElementById('purchaseDate').value;
+
+    if (!name || price <= 0) {
+      alert('请填写正确的物品名称和价格！');
+      return;
+    }
+
+    const newItem = {
+      id: Date.now(),
+      name,
+      category,
+      price,
+      count,
+      purchaseDate
+    };
+
+    const items = getItems();
+    items.unshift(newItem);
+    saveItems(items);
+
+    // 清空名称和价格输入框
+    document.getElementById('name').value = '';
+    document.getElementById('price').value = '';
+    document.getElementById('count').value = '1';
+  }
+
+  // 打卡 +1 次
+  function useItem(id) {
+    const items = getItems();
+    const item = items.find(i => i.id === id);
+    if (item) {
+      item.count += 1;
+      saveItems(items);
+    }
+  }
+
+  // 删除物品
+  function deleteItem(id) {
+    if (confirm('确定要删除这个物品吗？')) {
+      const items = getItems().filter(i => i.id !== id);
+      saveItems(items);
+    }
+  }
+
+  // 渲染页面
+  function render() {
+    const items = getItems();
+    const listEl = document.getElementById('itemList');
+    
+    let totalSpent = 0;
+    items.forEach(i => totalSpent += i.price);
+    
+    document.getElementById('totalSpent').innerText = '￥' + totalSpent.toFixed(2);
+    document.getElementById('totalCount').innerText = items.length;
+
+    if (items.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center; color:#999; margin-top:30px;">还没有添加任何物品，在上方添加一个吧！</div>';
+      return;
+    }
+
+    listEl.innerHTML = items.map(item => {
+      const avgCost = (item.price / item.count).toFixed(2);
+      return `
+        <div class="card item-card">
+          <div class="item-info">
+            <div class="item-name">${item.name}<span class="item-tag">${item.category}</span></div>
+            <div class="item-sub">原价 ￥${item.price.toFixed(2)} | 已用 ${item.count} 次 | ${item.purchaseDate}</div>
+          </div>
+          <div class="item-cost">
+            <div class="cost-num">￥${avgCost}</div>
+            <div class="cost-unit">单次成本</div>
+          </div>
+          <div>
+            <button class="btn-use" onclick="useItem(${item.id})">+1</button>
+            <button class="btn-del" onclick="deleteItem(${item.id})">❌</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 首次打开页面渲染数据
+  render();
+</script>
+
+</body>
+</html>
