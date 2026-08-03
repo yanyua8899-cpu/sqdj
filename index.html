@@ -3,92 +3,132 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>我的个人数字人生地图</title>
+  <title>一言一语 - 颜雨的人生地图</title>
   <style>
     :root {
-      --bg-color: #f0f7f4;
-      --primary-color: #43a047;
-      --card-bg: #ffffff;
-      --text-main: #2c3e50;
+      --bg-main: #f2f7f4;
+      --path-color: #a8e6cf;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --accent-green: #48bb78;
+      --text-dark: #2d3748;
     }
     
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg-color); margin: 0; padding: 20px 15px 80px 15px; color: var(--text-main); }
-    .container { max-width: 500px; margin: 0 auto; }
+    body { background-color: var(--bg-main); margin: 0; padding: 15px 15px 80px 15px; color: var(--text-dark); }
+    .container { max-width: 480px; margin: 0 auto; }
 
-    /* 顶栏控制箱 */
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .title { font-size: 20px; font-weight: bold; color: #2e7d32; margin: 0; }
-    .sync-btn { padding: 6px 12px; font-size: 12px; border: 1px solid #43a047; color: #43a047; background: #fff; border-radius: 20px; cursor: pointer; }
+    /* 顶栏 Header */
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .title { font-size: 22px; font-weight: 800; color: #2g7d32; margin: 0; letter-spacing: 1px; }
+    .sync-btn { padding: 6px 14px; font-size: 12px; border: 1.5px solid #48bb78; color: #2f855a; background: #fff; border-radius: 20px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
 
-    /* 地图看板主区域 */
-    .map-container { 
-      background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%);
-      border-radius: 20px; 
-      padding: 25px 15px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    /* 清新风景地图看板 */
+    .map-board { 
+      background: linear-gradient(180deg, #e0f2fe 0%, #dcfce7 40%, #fef3c7 100%);
+      border-radius: 28px; 
+      padding: 25px 18px; 
+      box-shadow: 0 10px 25px rgba(72, 187, 120, 0.15);
       position: relative;
-      margin-bottom: 20px;
-      border: 2px solid #a5d6a7;
+      border: 3px solid #ffffff;
+      overflow: hidden;
     }
 
-    /* 中央形象及激励气泡 */
-    .avatar-box { text-align: center; margin-bottom: 25px; position: relative; }
+    /* 地图装饰背景：云朵与风景路径线 */
+    .map-board::before {
+      content: "☁️"; position: absolute; top: 15px; left: 20px; font-size: 24px; opacity: 0.8;
+    }
+    .map-board::after {
+      content: "☁️"; position: absolute; top: 35px; right: 25px; font-size: 20px; opacity: 0.7;
+    }
+
+    /* 路线 S 弯曲线装饰 */
+    .path-svg {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 1; opacity: 0.5;
+    }
+
+    /* 中央跳舞形象与气泡 */
+    .avatar-area { text-align: center; margin: 10px 0 20px 0; position: relative; z-index: 2; }
     .speech-bubble {
-      background: #fff;
-      border-radius: 12px;
-      padding: 10px 15px;
+      background: var(--card-bg);
+      backdrop-filter: blur(5px);
+      border-radius: 16px;
+      padding: 10px 16px;
       font-size: 13px;
-      color: #333;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      color: #334155;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
       display: inline-block;
-      max-width: 80%;
-      margin-bottom: 10px;
-      position: relative;
-    }
-    .speech-bubble::after {
-      content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
-      border-width: 8px 8px 0; border-style: solid; border-color: #fff transparent;
+      max-width: 85%;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255,255,255,0.8);
+      font-weight: 500;
     }
     
-    /* 形象跳舞动画 */
-    .avatar { font-size: 55px; display: inline-block; transition: transform 0.3s; cursor: pointer; }
-    .avatar.dance { animation: danceAnim 0.6s infinite alternate; }
+    .avatar { font-size: 60px; display: inline-block; transition: transform 0.3s; cursor: pointer; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+    .avatar.bounce { animation: bounceAnim 0.5s ease; }
+    .avatar.dance { animation: danceAnim 0.6s infinite alternate ease-in-out; }
     
+    @keyframes bounceAnim {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-18px) scale(1.15) rotate(5deg); }
+    }
     @keyframes danceAnim {
-      0% { transform: translateY(0) rotate(0deg) scale(1); }
-      50% { transform: translateY(-12px) rotate(-10deg) scale(1.1); }
-      100% { transform: translateY(0) rotate(10deg) scale(1.1); }
+      0% { transform: translateY(0) rotate(-8deg) scale(1); }
+      100% { transform: translateY(-14px) rotate(8deg) scale(1.1); }
     }
 
-    /* 地图节点线路 */
-    .map-nodes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .node-card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 12px;
+    /* 关卡地标路径路线 (垂直风景路线) */
+    .landmark-list { display: flex; flex-direction: column; gap: 16px; position: relative; z-index: 2; }
+    
+    .landmark-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 14px 16px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      gap: 14px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
       cursor: pointer;
       border: 2px solid transparent;
-      transition: all 0.2s;
+      transition: all 0.25s ease;
+      position: relative;
     }
-    .node-card.completed { border-color: #43a047; background: #f1f8e9; }
-    .node-icon { font-size: 24px; }
-    .node-info { flex: 1; }
-    .node-title { font-size: 13px; font-weight: bold; }
-    .node-status { font-size: 11px; color: #888; margin-top: 2px; }
 
-    /* 弹出模态框 (管理激励语) */
-    .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-    .modal-content { background: #fff; border-radius: 16px; padding: 20px; width: 88%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
-    .btn-main { width: 100%; padding: 10px; background: #43a047; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    /* 错落的地图路径走势 */
+    .landmark-card:nth-child(even) { margin-left: 20px; }
+    .landmark-card:nth-child(odd) { margin-right: 20px; }
+
+    .landmark-card.active {
+      border-color: #34d399;
+      background: #ffffff;
+      box-shadow: 0 6px 16px rgba(52, 211, 153, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .landmark-badge {
+      width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #64748b;
+      display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;
+    }
+    .landmark-card.active .landmark-badge { background: #34d399; color: #fff; }
+
+    .landmark-icon { font-size: 30px; }
+    .landmark-info { flex: 1; }
+    .landmark-title { font-size: 14px; font-weight: 700; color: #1e293b; }
+    .landmark-desc { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+    /* 弹窗样式 */
+    .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: #fff; border-radius: 24px; padding: 22px; width: 90%; max-width: 420px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+    .modal-title { font-size: 17px; font-weight: bold; color: #0f172a; margin-top: 0; margin-bottom: 15px; text-align: center; }
+    
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 5px; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 13px; outline: none; }
+    
+    .btn-submit { width: 100%; padding: 12px; background: #10b981; color: #fff; border: none; border-radius: 14px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 10px; }
+    .btn-cancel { width: 100%; padding: 10px; background: #f1f5f9; color: #64748b; border: none; border-radius: 14px; font-weight: 600; font-size: 13px; cursor: pointer; margin-top: 6px; }
+
     .hidden { display: none !important; }
-
-    .quote-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
-    .quote-del { color: #e53935; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -96,7 +136,7 @@
 <div class="container">
   <!-- 顶栏 -->
   <div class="header">
-    <h1 class="title">🗺️ 我的生活地图</h1>
+    <h1 class="title">🍃 颜雨的人生地图</h1>
     <div>
       <button class="sync-btn" onclick="exportData()">📤 导出</button>
       <button class="sync-btn" onclick="document.getElementById('fileInput').click()">📥 导入</button>
@@ -104,236 +144,300 @@
     </div>
   </div>
 
-  <!-- 地图展示区 -->
-  <div class="map-container">
-    <!-- 中央小人与激励语 -->
-    <div class="avatar-box">
-      <div id="speechBubble" class="speech-bubble">点击地图上的站点开始打卡吧！</div><br>
-      <div id="userAvatar" class="avatar" onclick="triggerDanceManual()">💃</div>
+  <!-- 精致地图看板 -->
+  <div class="map-board">
+    <!-- SVG 弯曲小路路线背景 -->
+    <svg class="path-svg" viewBox="0 0 400 600" preserveAspectRatio="none">
+      <path d="M 100 120 Q 300 200 120 300 T 280 480" fill="none" stroke="#6ee7b7" stroke-width="6" stroke-dasharray="8 8"/>
+    </svg>
+
+    <!-- 中央跳舞小人与激励对话框 -->
+    <div class="avatar-area">
+      <div id="speechBubble" class="speech-bubble">今天想去哪个地标打卡呀？</div><br>
+      <div id="userAvatar" class="avatar" onclick="manualDance()">💃</div>
     </div>
 
-    <!-- 地图站点节点 -->
-    <div class="map-nodes">
-      <div class="node-card" id="node-省钱大计" onclick="toggleCheck('省钱大计')">
-        <span class="node-icon">💰</span>
-        <div class="node-info">
-          <div class="node-title">省钱大计</div>
-          <div class="node-status" id="status-省钱大计">未打卡</div>
+    <!-- 地标站点路线列表 -->
+    <div class="landmark-list">
+      <!-- 地标 1：省钱大计 -->
+      <div class="landmark-card" id="card-省钱大计" onclick="toggleCheck('省钱大计')">
+        <div class="landmark-badge">01</div>
+        <span class="landmark-icon">💰</span>
+        <div class="landmark-info">
+          <div class="landmark-title">省钱大计</div>
+          <div class="landmark-desc" id="desc-省钱大计">计算使用成本，理性消费</div>
         </div>
       </div>
 
-      <div class="node-card" id="node-身体能量" onclick="toggleCheck('身体能量')">
-        <span class="node-icon">🌙</span>
-        <div class="node-info">
-          <div class="node-title">身体状态</div>
-          <div class="node-status" id="status-身体能量">未打卡</div>
+      <!-- 地标 2：身体状态（弹出打卡框） -->
+      <div class="landmark-card" id="card-身体状态" onclick="openHealthModal()">
+        <div class="landmark-badge">02</div>
+        <span class="landmark-icon">🌙</span>
+        <div class="landmark-info">
+          <div class="landmark-title">身体状态</div>
+          <div class="landmark-desc" id="desc-身体状态">记录睡眠、月经与身体感受</div>
         </div>
       </div>
 
-      <div class="node-card" id="node-灵感抽屉" onclick="toggleCheck('灵感抽屉')">
-        <span class="node-icon">💡</span>
-        <div class="node-info">
-          <div class="node-title">闪念抽屉</div>
-          <div class="node-status" id="status-灵感抽屉">未打卡</div>
+      <!-- 地标 3：闪念抽屉（一键倾倒） -->
+      <div class="landmark-card" id="card-闪念抽屉" onclick="openIdeaModal()">
+        <div class="landmark-badge">03</div>
+        <span class="landmark-icon">💡</span>
+        <div class="landmark-info">
+          <div class="landmark-title">闪念抽屉</div>
+          <div class="landmark-desc" id="desc-闪念抽屉">倾倒那些奇怪又琐碎的念头</div>
         </div>
       </div>
 
-      <div class="node-card" id="node-语言学习" onclick="toggleCheck('语言学习')">
-        <span class="node-icon">🗣️</span>
-        <div class="node-info">
-          <div class="node-title">韩/英打卡</div>
-          <div class="node-status" id="status-语言学习">未打卡</div>
+      <!-- 地标 4：语言学习 -->
+      <div class="landmark-card" id="card-语言学习" onclick="toggleCheck('语言学习')">
+        <div class="landmark-badge">04</div>
+        <span class="landmark-icon">🗣️</span>
+        <div class="landmark-info">
+          <div class="landmark-title">韩 / 英打卡</div>
+          <div class="landmark-desc" id="desc-语言学习">每天积累一个常用好句</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 管理激励语入口 -->
-  <button class="sync-btn" style="width: 100%; padding: 10px; margin-top: 10px;" onclick="openQuoteModal()">💬 自定义我的每日激励语库</button>
+  <button class="sync-btn" style="width: 100%; padding: 12px; margin-top: 15px; font-size: 13px;" onclick="openQuoteModal()">💬 管理我的“一言一语”激励金句</button>
 </div>
 
-<!-- 激励语管理弹窗 -->
+<!-- 身体状态弹窗 -->
+<div id="healthModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-title">🌙 身体状态记录</div>
+    <div class="form-group">
+      <label>睡眠质量</label>
+      <select id="sleepQuality">
+        <option value="😴 睡得很香">😴 睡得很香</option>
+        <option value="😐 状态一般">😐 状态一般</option>
+        <option value="🥱 没睡好/失眠">🥱 没睡好/失眠</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>生理期记录</label>
+      <select id="periodStatus">
+        <option value="无特别">无特别</option>
+        <option value="🌸 经期第一天">🌸 经期第一天</option>
+        <option value="🩸 经期中">🩸 经期中</option>
+        <option value="💫 经前期(PMS)">💫 经前期(PMS)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>身体哪里不舒服？</label>
+      <input type="text" id="bodySymptom" placeholder="例如：肩颈酸痛、头晕、胃胀...">
+    </div>
+    <button class="btn-submit" onclick="saveHealthData()">保存并打卡</button>
+    <button class="btn-cancel" onclick="closeModal('healthModal')">取消</button>
+  </div>
+</div>
+
+<!-- 闪念抽屉弹窗 -->
+<div id="ideaModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-title">💡 闪念抽屉（碎碎念倾倒）</div>
+    <div class="form-group">
+      <label>现在的奇怪念头或琐碎想法：</label>
+      <textarea id="ideaText" rows="4" placeholder="随时把脑子里的东西倒在这里，哪怕很乱也没关系..."></textarea>
+    </div>
+    <button class="btn-submit" onclick="saveIdeaData()">投进抽屉并打卡</button>
+    <button class="btn-cancel" onclick="closeModal('ideaModal')">取消</button>
+  </div>
+</div>
+
+<!-- 激励语弹窗 -->
 <div id="quoteModal" class="modal hidden">
   <div class="modal-content">
-    <h3 style="margin-top:0;">📝 每日激励语录库</h3>
+    <div class="modal-title">📝 颜雨的每日金句库</div>
     <div style="display:flex; gap:8px; margin-bottom:12px;">
-      <input type="text" id="newQuoteInput" placeholder="写一句鼓励自己的话..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px;">
-      <button onclick="addQuote()" style="background:#43a047; color:#fff; border:none; border-radius:6px; padding:0 12px; cursor:pointer;">添加</button>
+      <input type="text" id="newQuoteInput" placeholder="写一句鼓励自己的话..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:8px;">
+      <button onclick="addQuote()" style="background:#10b981; color:#fff; border:none; border-radius:8px; padding:0 12px; font-weight:bold; cursor:pointer;">添加</button>
     </div>
     <div id="quoteList"></div>
-    <button class="btn-main" onclick="closeQuoteModal()">完成</button>
+    <button class="btn-cancel" onclick="closeModal('quoteModal')">完成</button>
   </div>
 </div>
 
 <script>
-  // 默认激励语库
   const defaultQuotes = [
-    "今天也是充满能量的一天，继续加油！",
+    "颜雨，今天也是充满能量的一天！",
     "每一个微小的记录，都在塑造更好的自己。",
     "按自己的节奏来，不急不躁。",
     "你做得很棒了，记得多喝水休息一下！"
   ];
 
-  function getStorageData() {
-    return JSON.parse(localStorage.getItem('life_map_data') || JSON.stringify({
+  function getTodayKey() { return new Date().toISOString().slice(0, 10); }
+
+  function getData() {
+    return JSON.parse(localStorage.getItem('yan_yu_data') || JSON.stringify({
       quotes: defaultQuotes,
-      todayChecks: {}
+      dailyChecks: {},
+      healthLogs: {},
+      ideas: []
     }));
   }
 
-  function saveStorageData(data) {
-    localStorage.setItem('life_map_data', JSON.stringify(data));
+  function saveData(data) {
+    localStorage.setItem('yan_yu_data', JSON.stringify(data));
     render();
   }
 
-  // 获取今天的日期字符串 YYYY-MM-DD
-  function getTodayKey() {
-    return new Date().toISOString().slice(0, 10);
-  }
-
-  // 打卡状态切换
+  // 地图点亮与跳跃
   function toggleCheck(nodeName) {
-    const data = getStorageData();
+    const data = getData();
     const today = getTodayKey();
-    if (!data.todayChecks[today]) data.todayChecks[today] = {};
+    if (!data.dailyChecks[today]) data.dailyChecks[today] = {};
 
-    data.todayChecks[today][nodeName] = !data.todayChecks[today][nodeName];
-    saveStorageData(data);
-    
-    // 如果打卡完成，显示随机激励语
-    if (data.todayChecks[today][nodeName]) {
-      showRandomQuote();
+    data.dailyChecks[today][nodeName] = !data.dailyChecks[today][nodeName];
+    saveData(data);
+
+    if (data.dailyChecks[today][nodeName]) {
+      triggerBounce();
     }
   }
 
-  // 渲染界面
-  function render() {
-    const data = getStorageData();
+  // 身体状态保存
+  function openHealthModal() { document.getElementById('healthModal').classList.remove('hidden'); }
+  function saveHealthData() {
+    const data = getData();
     const today = getTodayKey();
-    const checks = data.todayChecks[today] || {};
-    
-    const nodes = ['省钱大计', '身体能量', '灵感抽屉', '语言学习'];
-    let completedCount = 0;
+    if (!data.dailyChecks[today]) data.dailyChecks[today] = {};
 
-    nodes.forEach(node => {
-      const isDone = checks[node];
-      const card = document.getElementById(`node-${node}`);
-      const statusText = document.getElementById(`status-${node}`);
+    data.healthLogs[today] = {
+      sleep: document.getElementById('sleepQuality').value,
+      period: document.getElementById('periodStatus').value,
+      symptom: document.getElementById('bodySymptom').value
+    };
+    data.dailyChecks[today]['身体状态'] = true;
 
-      if (isDone) {
-        card.classList.add('completed');
-        statusText.innerText = '✅ 已打卡';
-        completedCount++;
-      } else {
-        card.classList.remove('completed');
-        statusText.innerText = '未打卡';
-      }
-    });
+    saveData(data);
+    closeModal('healthModal');
+    triggerBounce();
+  }
 
-    // 全部完成触发跳舞
+  // 闪念保存
+  function openIdeaModal() { document.getElementById('ideaModal').classList.remove('hidden'); }
+  function saveIdeaData() {
+    const text = document.getElementById('ideaText').value.trim();
+    if (text) {
+      const data = getData();
+      const today = getTodayKey();
+      if (!data.dailyChecks[today]) data.dailyChecks[today] = {};
+
+      data.ideas.push({ date: today, text: text });
+      data.dailyChecks[today]['闪念抽屉'] = true;
+
+      saveData(data);
+      document.getElementById('ideaText').value = '';
+    }
+    closeModal('ideaModal');
+    triggerBounce();
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+  // 单次跳跃 + 随机金句
+  function triggerBounce() {
     const avatar = document.getElementById('userAvatar');
-    if (completedCount === nodes.length && nodes.length > 0) {
-      avatar.classList.add('dance');
-      document.getElementById('speechBubble').innerText = "🎉 太棒啦！今天所有的目标都已达成，继续保持！";
-    } else {
-      avatar.classList.remove('dance');
-    }
+    avatar.classList.add('bounce');
+    showRandomQuote();
+    setTimeout(() => avatar.classList.remove('bounce'), 600);
   }
 
-  // 随机展示激励语
+  function manualDance() {
+    triggerBounce();
+  }
+
   function showRandomQuote() {
-    const data = getStorageData();
+    const data = getData();
     const quotes = data.quotes.length > 0 ? data.quotes : defaultQuotes;
     const random = quotes[Math.floor(Math.random() * quotes.length)];
     document.getElementById('speechBubble').innerText = random;
   }
 
-  // 手动点击小人触发跳舞
-  function triggerDanceManual() {
-    const avatar = document.getElementById('userAvatar');
-    avatar.classList.add('dance');
-    showRandomQuote();
-    setTimeout(() => {
-      const data = getStorageData();
-      const today = getTodayKey();
-      const checks = data.todayChecks[today] || {};
-      if (Object.keys(checks).length < 4) {
-        avatar.classList.remove('dance');
+  // 页面渲染
+  function render() {
+    const data = getData();
+    const today = getTodayKey();
+    const checks = data.dailyChecks[today] || {};
+    
+    const nodes = ['省钱大计', '身体状态', '闪念抽屉', '语言学习'];
+    let count = 0;
+
+    nodes.forEach(node => {
+      const card = document.getElementById(`card-${node}`);
+      const desc = document.getElementById(`desc-${node}`);
+      if (checks[node]) {
+        card.classList.add('active');
+        desc.innerText = "✅ 今日已打卡点亮！";
+        count++;
+      } else {
+        card.classList.remove('active');
       }
-    }, 2000);
+    });
+
+    // 全部打卡成功，小人持续欢快跳舞
+    const avatar = document.getElementById('userAvatar');
+    if (count === nodes.length && nodes.length > 0) {
+      avatar.classList.add('dance');
+      document.getElementById('speechBubble').innerText = "🎉 哇！今天的四座地图地标全被颜雨解锁啦！超棒！";
+    } else {
+      avatar.classList.remove('dance');
+    }
   }
 
-  /* ---- 激励语录库管理 ---- */
-  function openQuoteModal() {
-    document.getElementById('quoteModal').classList.remove('hidden');
-    renderQuoteList();
-  }
-
-  function closeQuoteModal() {
-    document.getElementById('quoteModal').classList.add('hidden');
-  }
-
+  /* 激励金句管理 */
+  function openQuoteModal() { document.getElementById('quoteModal').classList.remove('hidden'); renderQuoteList(); }
   function renderQuoteList() {
-    const data = getStorageData();
-    const listEl = document.getElementById('quoteList');
-    listEl.innerHTML = data.quotes.map((q, idx) => `
-      <div class="quote-item">
+    const data = getData();
+    document.getElementById('quoteList').innerHTML = data.quotes.map((q, i) => `
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9; font-size:13px;">
         <span>${q}</span>
-        <span class="quote-del" onclick="deleteQuote(${idx})">删除</span>
+        <span style="color:#ef4444; cursor:pointer;" onclick="deleteQuote(${i})">删除</span>
       </div>
     `).join('');
   }
-
   function addQuote() {
     const input = document.getElementById('newQuoteInput');
-    const text = input.value.trim();
-    if (!text) return;
-    const data = getStorageData();
-    data.quotes.push(text);
-    saveStorageData(data);
+    if (!input.value.trim()) return;
+    const data = getData();
+    data.quotes.push(input.value.trim());
+    saveData(data);
     input.value = '';
     renderQuoteList();
   }
-
-  function deleteQuote(idx) {
-    const data = getStorageData();
-    data.quotes.splice(idx, 1);
-    saveStorageData(data);
+  function deleteQuote(i) {
+    const data = getData();
+    data.quotes.splice(i, 1);
+    saveData(data);
     renderQuoteList();
   }
 
-  /* ---- 数据导出 / 导入 ---- */
+  /* 导入导出 */
   function exportData() {
-    const data = getStorageData();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(getData(), null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `人生地图备份_${getTodayKey()}.json`;
+    a.download = `一言一语_颜雨地图数据_${getTodayKey()}.json`;
     a.click();
   }
-
-  function importData(event) {
-    const file = event.target.files[0];
+  function importData(e) {
+    const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function(evt) {
       try {
-        const importedData = JSON.parse(e.target.result);
-        if (confirm('确认导入此数据备份吗？')) {
-          saveStorageData(importedData);
-          alert('数据导入成功！');
-        }
-      } catch (err) {
-        alert('文件格式不正确，导入失败！');
-      }
+        saveData(JSON.parse(evt.target.result));
+        alert('导入成功！');
+      } catch (err) { alert('文件无效！'); }
     };
     reader.readAsText(file);
   }
 
-  // 页面初始化
   render();
   showRandomQuote();
 </script>
-
 </body>
 </html>
