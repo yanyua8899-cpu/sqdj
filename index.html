@@ -2,1036 +2,341 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>一言一语 - 颜雨的人生地图</title>
-  
-  <!-- PWA 支持配置 -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#10b981">
-  <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22%E4%B8%80%E8%A8%80%E4%B8%80%E8%AF%AD%22%2C%22short_name%22%3A%22%E4%B8%80%E8%A8%80%E4%B8%80%E8%AF%AD%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f0fdf4%22%2C%22theme_color%22%3A%22%2310b981%22%7D">
-
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>省钱大计 - 理性消费助手</title>
   <style>
-    :root {
-      --bg-main: #f0fdf4;
-      --card-bg: rgba(255, 255, 255, 0.96);
-      --primary: #10b981;
-      --primary-dark: #047857;
-      --accent-purple: #6366f1;
-      --text-dark: #1e293b;
-      --text-muted: #64748b;
-      --map-bg: linear-gradient(180deg, #e0f2fe 0%, #dcfce7 50%, #fef3c7 100%);
-    }
-
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg-main); margin: 0; padding: 12px 12px 80px 12px; color: var(--text-dark); }
-    .container { max-width: 480px; margin: 0 auto; }
-
-    /* 页眉 */
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .title { font-size: 19px; font-weight: 800; color: var(--primary-dark); margin: 0; letter-spacing: 0.5px; }
-    .btn-group-sm { display: flex; gap: 6px; }
-    .sync-btn { padding: 4px 10px; font-size: 11px; border: 1.5px solid var(--primary); color: var(--primary-dark); background: #fff; border-radius: 16px; cursor: pointer; font-weight: 600; }
-
-    /* 地图看板 */
-    .map-board { 
-      background: var(--map-bg);
-      border-radius: 24px; padding: 18px 14px; 
-      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.12);
-      position: relative; border: 3px solid #ffffff; overflow: hidden;
-      transition: background 0.5s ease;
-    }
-
-    .season-tag {
-      position: absolute; top: 10px; right: 12px; font-size: 10px; font-weight: bold;
-      background: rgba(255,255,255,0.8); padding: 2px 8px; border-radius: 10px; color: #475569;
-    }
-
-    .avatar-area { text-align: center; margin: 4px 0 12px 0; position: relative; z-index: 2; }
-    .speech-bubble {
-      background: var(--card-bg); border-radius: 14px; padding: 8px 12px;
-      font-size: 12px; color: #334155; box-shadow: 0 3px 10px rgba(0,0,0,0.04);
-      display: inline-block; max-width: 90%; margin-bottom: 6px; font-weight: 500;
-    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f4f6f8; margin: 0; padding: 15px 15px 70px 15px; color: #333; }
+    .container { max-width: 500px; margin: 0 auto; }
+    h1 { text-align: center; color: #1976d2; font-size: 22px; margin-bottom: 15px; }
     
-    .avatar { font-size: 50px; display: inline-block; transition: transform 0.3s; cursor: pointer; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-    .avatar.bounce { animation: bounceAnim 0.5s ease; }
-    .avatar.dance { animation: danceAnim 0.6s infinite alternate ease-in-out; }
+    /* 卡片通用 */
+    .card { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
     
-    @keyframes bounceAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px) scale(1.1); } }
-    @keyframes danceAnim { 0% { transform: translateY(0) rotate(-8deg); } 100% { transform: translateY(-12px) rotate(8deg); } }
-
-    /* 地标卡片 */
-    .landmark-list { display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 2; }
-    .landmark-card {
-      background: var(--card-bg); border-radius: 16px; padding: 12px;
-      display: flex; align-items: center; gap: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: pointer; border: 2px solid transparent; transition: all 0.2s;
-    }
-    .landmark-card:nth-child(even) { margin-left: 12px; }
-    .landmark-card:nth-child(odd) { margin-right: 12px; }
-
-    .landmark-card.active { border-color: var(--primary); background: #ffffff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.18); }
-    .landmark-badge { width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
-    .landmark-card.active .landmark-badge { background: var(--primary); color: #fff; }
-    .landmark-icon { font-size: 24px; }
-    .landmark-info { flex: 1; }
-    .landmark-title { font-size: 13px; font-weight: 700; color: #0f172a; }
-    .landmark-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-
-    /* 成就勋章样式 */
-    .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
-    .badge-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 6px; text-align: center; opacity: 0.4; filter: grayscale(100%); transition: all 0.3s; }
-    .badge-item.unlocked { opacity: 1; filter: none; background: #f0fdf4; border-color: #bbf7d0; }
-    .badge-icon { font-size: 22px; margin-bottom: 2px; }
-    .badge-name { font-size: 10px; font-weight: bold; color: #0f172a; }
-
-    /* 底部导航 */
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
-      background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(10px);
-      border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around;
-      align-items: center; z-index: 900;
-    }
-    .nav-item {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: #64748b; font-size: 10px; font-weight: 600; cursor: pointer; width: 50%; height: 100%;
-    }
-    .nav-item.active { color: var(--primary-dark); font-weight: 800; }
-    .nav-icon { font-size: 18px; margin-bottom: 2px; }
-
-    /* UI 模态窗 */
-    .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-    .modal-content { background: #fff; border-radius: 20px; padding: 18px; width: 92%; max-width: 430px; max-height: 88vh; overflow-y: auto; }
-    .modal-title { font-size: 15px; font-weight: bold; color: #0f172a; margin-bottom: 12px; text-align: center; }
-    
+    /* 表单 */
     .form-group { margin-bottom: 10px; }
-    .form-group label { display: block; font-size: 11px; font-weight: 600; color: #475569; margin-bottom: 4px; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 12px; outline: none; }
+    .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 4px; }
+    .form-group input, .form-group select { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+    .form-row { display: flex; gap: 10px; }
+    .btn-submit { width: 100%; padding: 10px; background: #2196f3; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 5px; }
     
-    .food-tag-container { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-    .food-tag { background: #f1f5f9; color: #475569; font-size: 10px; padding: 3px 7px; border-radius: 10px; cursor: pointer; }
+    /* 数据同步区 */
+    .sync-bar { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 10px; }
+    .btn-sync { flex: 1; padding: 8px; font-size: 12px; border: 1px solid #1976d2; color: #1976d2; background: #fff; border-radius: 6px; cursor: pointer; text-align: center; }
+    
+    /* 概览面板 */
+    .summary { display: flex; justify-content: space-around; text-align: center; background: linear-gradient(135deg, #1e88e5, #1565c0); color: #fff; }
+    .summary div span { display: block; }
+    .summary-num { font-size: 18px; font-weight: bold; }
+    .summary-label { font-size: 12px; opacity: 0.8; }
+    
+    /* 物品卡片 */
+    .item-card { display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #2196f3; padding: 12px; }
+    .item-info { flex: 1; }
+    .item-name { font-weight: bold; font-size: 15px; margin-bottom: 4px; }
+    .item-tag { font-size: 11px; background: #e3f2fd; color: #1976d2; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: normal; }
+    .item-sub { font-size: 12px; color: #777; }
+    .item-cost { text-align: right; margin-right: 10px; }
+    .cost-num { font-size: 16px; font-weight: bold; color: #e53935; }
+    .cost-unit { font-size: 10px; color: #888; }
+    
+    .action-btns { display: flex; flex-direction: column; gap: 4px; }
+    .btn-sm { border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+    .btn-use { background: #4caf50; color: white; font-weight: bold; }
+    .btn-edit { background: #ff9800; color: white; }
+    .btn-move { background: #eceff1; color: #455a64; }
+    .btn-del { background: none; color: #ccc; font-size: 11px; }
 
-    .btn-submit { width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-weight: bold; font-size: 12px; cursor: pointer; margin-top: 8px; }
-    .btn-ai { width: 100%; padding: 10px; background: var(--accent-purple); color: #fff; border: none; border-radius: 12px; font-weight: bold; font-size: 12px; cursor: pointer; margin-top: 6px; }
-    .btn-cancel { width: 100%; padding: 8px; background: #f1f5f9; color: #64748b; border: none; border-radius: 10px; font-size: 11px; cursor: pointer; margin-top: 6px; }
-
-    /* 进度条组件 */
-    .progress-bar-bg { background: #e2e8f0; border-radius: 10px; height: 12px; overflow: hidden; width: 100%; margin: 6px 0; }
-    .progress-bar-fill { background: linear-gradient(90deg, #10b981, #059669); height: 100%; width: 0%; transition: width 0.5s ease; }
-
-    /* 商务韩语卡片 */
-    .flashcard {
-      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-      border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 20px 15px;
-      text-align: center; min-height: 140px; display: flex; flex-direction: column;
-      justify-content: center; align-items: center; margin-bottom: 12px; cursor: pointer; position: relative;
-    }
-    .flashcard-korean { font-size: 16px; font-weight: bold; color: #0f172a; margin-bottom: 8px; }
-    .flashcard-chinese { font-size: 13px; color: #059669; margin-top: 6px; }
-    .flashcard-tag { font-size: 10px; background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 8px; margin-bottom: 6px; }
-    .btn-tts { position: absolute; top: 10px; right: 12px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; }
-
-    .sm2-btns { display: flex; gap: 6px; width: 100%; }
-    .btn-sm2 { flex: 1; padding: 8px 0; border: none; border-radius: 10px; font-size: 11px; font-weight: bold; color: #fff; cursor: pointer; }
-    .btn-again { background: #ef4444; }
-    .btn-hard { background: #f59e0b; }
-    .btn-good { background: #10b981; }
-
-    .history-card { background: #fff; border-left: 3px solid var(--primary); padding: 10px 12px; margin-bottom: 10px; border-radius: 0 12px 12px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.02); font-size: 11px; }
-    .history-date { font-weight: bold; color: #0f172a; font-size: 12px; margin-bottom: 4px; }
-
+    /* 底部导航栏 */
+    .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 55px; background: #fff; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+    .nav-btn { flex: 1; text-align: center; padding: 8px 0; color: #757575; font-size: 13px; font-weight: bold; cursor: pointer; border: none; background: none; }
+    .nav-btn.active { color: #1976d2; }
+    
     .hidden { display: none !important; }
-    .tab-btn { flex:1; padding:6px; font-size:11px; border:none; background:#f1f5f9; color:#64748b; font-weight:bold; border-radius:8px; cursor:pointer; }
-    .tab-btn.active { background:var(--primary); color:#fff; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 页眉 -->
-  <div class="header">
-    <h1 class="title">🍃 颜雨的人生地图</h1>
-    <div class="btn-group-sm">
-      <button class="sync-btn" onclick="exportData()">导出</button>
-      <button class="sync-btn" onclick="document.getElementById('fileInput').click()">导入</button>
-      <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importData(event)">
-    </div>
+  <h1>🐷 省钱大计</h1>
+
+  <!-- 数据导入导出栏 -->
+  <div class="sync-bar">
+    <button class="btn-sync" onclick="exportData()">📤 导出备份数据</button>
+    <button class="btn-sync" onclick="document.getElementById('fileInput').click()">📥 导入备份数据</button>
+    <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importData(event)">
   </div>
 
-  <!-- View 1: 今日 -->
-  <div id="viewToday">
-    <div class="map-board" id="mapBoard">
-      <div class="season-tag" id="seasonTag">🌸 春日漫游</div>
-      <div class="avatar-area">
-        <div id="speechBubble" class="speech-bubble">今天想去哪个地标打卡呀？</div><br>
-        <div id="userAvatar" class="avatar" onclick="triggerBounce()">💃</div>
+  <!-- 页面 1：又花钱？ (添加/编辑页面) -->
+  <div id="pageAdd" class="card">
+    <h3 id="formTitle" style="margin-top:0; color:#1976d2;">💸 记录一笔新消费</h3>
+    <input type="hidden" id="editId">
+    
+    <div class="form-group">
+      <label>物品名称</label>
+      <input type="text" id="name" placeholder="例如：蓝牙耳机">
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;">
+        <label>分类</label>
+        <select id="category">
+          <option>数码家电</option>
+          <option>服饰鞋包</option>
+          <option>生活用品</option>
+          <option>美妆护肤</option>
+          <option>其他</option>
+        </select>
       </div>
-
-      <div class="landmark-list">
-        <!-- 01 省钱大计与存钱规划 -->
-        <div class="landmark-card" id="card-省钱大计" onclick="openSavingsModal()">
-          <div class="landmark-badge">01</div>
-          <span class="landmark-icon">💰</span>
-          <div class="landmark-info">
-            <div class="landmark-title">省钱大计 & 自动记账</div>
-            <div class="landmark-desc" id="desc-省钱大计">单次成本计算 + 存钱目标 + 智能分析</div>
-          </div>
-        </div>
-
-        <!-- 02 身体状态 -->
-        <div class="landmark-card" id="card-身体状态" onclick="openHealthModal()">
-          <div class="landmark-badge">02</div>
-          <span class="landmark-icon">🌙</span>
-          <div class="landmark-info">
-            <div class="landmark-title">身体与睡眠电量站</div>
-            <div class="landmark-desc" id="desc-身体状态">睡眠时长、生理期与饮食记录</div>
-          </div>
-        </div>
-
-        <!-- 03 闪念抽屉 -->
-        <div class="landmark-card" id="card-闪念抽屉" onclick="openIdeaModal()">
-          <div class="landmark-badge">03</div>
-          <span class="landmark-icon">💡</span>
-          <div class="landmark-info">
-            <div class="landmark-title">闪念与焦虑分析</div>
-            <div class="landmark-desc" id="desc-闪念抽屉">倾倒碎碎念 & 一键 AI 联网诊断</div>
-          </div>
-        </div>
-
-        <!-- 04 商务韩语 -->
-        <div class="landmark-card" id="card-语言学习" onclick="openKoreanModal()">
-          <div class="landmark-badge">04</div>
-          <span class="landmark-icon">🗣️</span>
-          <div class="landmark-info">
-            <div class="landmark-title">商务韩语 (SM2 记忆卡)</div>
-            <div class="landmark-desc" id="desc-语言学习">场景复习、TTS 发音 & 批量导入</div>
-          </div>
-        </div>
+      <div class="form-group" style="flex:1;">
+        <label>价格 (元)</label>
+        <input type="number" id="price" step="0.01" placeholder="0.00">
       </div>
     </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;">
+        <label>已用次数</label>
+        <input type="number" id="count" value="1" min="1">
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label>购入日期</label>
+        <input type="date" id="purchaseDate">
+      </div>
+    </div>
+    <button class="btn-submit" id="btnSave" onclick="saveItem()">保存记录</button>
+    <button class="btn-submit hidden" id="btnCancel" style="background:#9e9e9e;" onclick="resetForm()">取消编辑</button>
   </div>
 
-  <!-- View 2: 过往 -->
-  <div id="viewHistory" class="hidden">
-    <div style="background:#fff; border-radius:18px; padding:15px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-      <h3 style="margin:0 0 8px 0; color:var(--primary-dark); font-size:14px;">🏆 成就与勋章墙</h3>
-      <div class="badge-grid" id="badgeGrid"></div>
-
-      <hr style="border:none; border-top:1px solid #e2e8f0; margin:15px 0;">
-
-      <h3 style="margin:0 0 10px 0; color:var(--primary-dark); font-size:14px;">📈 睡眠电量趋势 (近7次)</h3>
-      <canvas id="sleepChart" style="width:100%; height:150px; margin-bottom:15px;"></canvas>
-      
-      <h3 style="margin:0 0 10px 0; color:var(--primary-dark); font-size:14px;">📜 时光轨迹归档</h3>
-      <div id="historyList">加载中...</div>
+  <!-- 页面 2：所有物品 (数据概览与列表) -->
+  <div id="pageList" class="hidden">
+    <!-- 概览面板 -->
+    <div class="card summary">
+      <div>
+        <span class="summary-num" id="totalSpent">￥0</span>
+        <span class="summary-label">累计投入</span>
+      </div>
+      <div>
+        <span class="summary-num" id="totalCount">0</span>
+        <span class="summary-label">物品总数</span>
+      </div>
     </div>
+
+    <!-- 列表展示 -->
+    <div id="itemList"></div>
   </div>
 </div>
 
 <!-- 底部固定导航栏 -->
-<div class="bottom-nav">
-  <div class="nav-item active" id="navToday" onclick="switchView('today')">
-    <span class="nav-icon">🌱</span>
-    <span>今日：人只有现在</span>
-  </div>
-  <div class="nav-item" id="navHistory" onclick="switchView('history')">
-    <span class="nav-icon">📜</span>
-    <span>过往：只能怀念</span>
-  </div>
-</div>
-
-<!-- 01 省钱大计 & 自动记账 & 存钱目标 弹窗 -->
-<div id="savingsModal" class="modal hidden">
-  <div class="modal-content">
-    <div class="modal-title">💰 省钱大计 & 存钱目标</div>
-
-    <!-- 顶部 Tab 切换 -->
-    <div style="display:flex; gap:4px; margin-bottom:12px;">
-      <button class="tab-btn active" id="tabCost" onclick="switchSavingsTab('cost')">单次成本 (Cost-per-use)</button>
-      <button class="tab-btn" id="tabAuto" onclick="switchSavingsTab('auto')">智能记账</button>
-      <button class="tab-btn" id="tabGoal" onclick="switchSavingsTab('goal')">存钱与 AI 建议</button>
-    </div>
-
-    <!-- Tab 1: 单次成本计算器 -->
-    <div id="subTabCost">
-      <div class="form-group">
-        <label>新增物品/课程名称</label>
-        <input type="text" id="itemName" placeholder="如：胶囊咖啡机、韩语外教课...">
-      </div>
-      <div class="form-group" style="display:flex; gap:8px;">
-        <div style="flex:1;">
-          <label>价格 (元)</label>
-          <input type="number" id="itemPrice" placeholder="0.00">
-        </div>
-        <div style="flex:1;">
-          <label>已使用次数</label>
-          <input type="number" id="itemCount" value="1">
-        </div>
-      </div>
-      <button class="btn-submit" onclick="addSavingsItem()">添加物品并记账</button>
-      
-      <hr style="border:none; border-top:1px solid #e2e8f0; margin:12px 0;">
-      <div style="font-size:11px; font-weight:bold; color:#475569; margin-bottom:6px;">📦 已录入物品（点击“+1”自动摊薄成本）：</div>
-      <div id="savingsList" style="max-height:160px; overflow-y:auto;"></div>
-    </div>
-
-    <!-- Tab 2: 智能/文本粘贴自动记账 -->
-    <div id="subTabAuto" class="hidden">
-      <div class="form-group">
-        <label>📋 自动识别记账（粘贴微信/支付宝账单文本）</label>
-        <textarea id="autoPayText" rows="3" placeholder="例如粘贴：微信支付：已向外卖商家付款 35.50 元&#10;或者直接写：买咖啡 28"></textarea>
-      </div>
-      <button class="btn-submit" style="background:var(--accent-purple);" onclick="parseAutoPay()">🤖 自动解析并记录账单</button>
-
-      <hr style="border:none; border-top:1px solid #e2e8f0; margin:12px 0;">
-      <div style="font-size:11px; font-weight:bold; color:#475569; margin-bottom:6px;">🧾 最近收支记录：</div>
-      <div id="transactionList" style="max-height:140px; overflow-y:auto;"></div>
-    </div>
-
-    <!-- Tab 3: 存钱目标与开源节流 AI 建议 -->
-    <div id="subTabGoal" class="hidden">
-      <div class="form-group" style="display:flex; gap:8px;">
-        <div style="flex:1;">
-          <label>我的存钱目标金额 (元)</label>
-          <input type="number" id="savingsGoalInput" value="50000" onchange="updateGoalProgress()">
-        </div>
-        <div style="flex:1;">
-          <label>现有储蓄/结余 (元)</label>
-          <input type="number" id="currentSavingsInput" value="12000" onchange="updateGoalProgress()">
-        </div>
-      </div>
-
-      <!-- 存钱进度条 -->
-      <div style="font-size:11px; font-weight:bold; color:#0f172a; margin-top:4px;">
-        🎯 存钱进度：<span id="goalPercent">0%</span>
-      </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="goalBarFill"></div>
-      </div>
-      <div style="font-size:11px; color:#059669; font-weight:bold;" id="remainingGoalText">距离目标还差：￥0</div>
-
-      <hr style="border:none; border-top:1px solid #e2e8f0; margin:12px 0;">
-
-      <!-- 开源节流 AI 动态建议 -->
-      <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:10px; font-size:11px; color:#166534;" id="financialAdviceArea">
-        💡 点击下面按钮，生成专属开源节流建议...
-      </div>
-      <button class="btn-ai" onclick="generateFinancialAdvice()">💡 生成针对性开源节流建议</button>
-    </div>
-
-    <button class="btn-submit" style="background:#059669; margin-top:12px;" onclick="markSavingsChecked()">点亮今日省钱地标</button>
-    <button class="btn-cancel" onclick="closeModal('savingsModal')">关闭</button>
-  </div>
-</div>
-
-<!-- 02 身体与睡眠弹窗 -->
-<div id="healthModal" class="modal hidden">
-  <div class="modal-content">
-    <div class="modal-title">🌙 身体与睡眠电量站</div>
-    <div class="form-group" style="display:flex; gap:8px;">
-      <div style="flex:1;">
-        <label>入睡时间</label>
-        <input type="time" id="sleepStart" value="23:30" onchange="calculateSleep()">
-      </div>
-      <div style="flex:1;">
-        <label>起床时间</label>
-        <input type="time" id="sleepEnd" value="07:30" onchange="calculateSleep()">
-      </div>
-    </div>
-    <div style="font-size:11px; color:#059669; font-weight:bold; margin-bottom:8px;" id="sleepDurationText">时长计算中...</div>
-    
-    <div class="form-group">
-      <label>今天吃了什么？(点击快捷标签或直接输入)</label>
-      <input type="text" id="foodInput" placeholder="如：燕麦拿铁, 鸡胸肉沙拉...">
-      <div class="food-tag-container" id="foodTagContainer"></div>
-    </div>
-
-    <div class="form-group">
-      <label>生理期阶段</label>
-      <select id="periodStatus">
-        <option value="无特别">无特别</option>
-        <option value="🌸 经期(注意保暖休息)">🌸 经期(注意保暖休息)</option>
-        <option value="🌿 卵泡期(能量充足期)">🌿 卵泡期(能量充足期)</option>
-        <option value="💫 黄体期/PMS(易疲劳)">💫 黄体期/PMS(易疲劳)</option>
-      </select>
-    </div>
-    
-    <div class="form-group">
-      <label>身体不适/体感</label>
-      <input type="text" id="bodySymptom" placeholder="例如：肩颈酸痛、眼睛干涩...">
-    </div>
-
-    <div id="adviceContainer" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:8px; font-size:11px; color:#166534; margin-top:8px;">
-      💡 智能定制建议生成中...
-    </div>
-
-    <button class="btn-submit" onclick="saveHealthData()">保存并打卡</button>
-    <button class="btn-cancel" onclick="closeModal('healthModal')">取消</button>
-  </div>
-</div>
-
-<!-- 03 闪念与 AI 分析弹窗 -->
-<div id="ideaModal" class="modal hidden">
-  <div class="modal-content">
-    <div class="modal-title">💡 闪念与焦虑抽屉</div>
-    <div class="form-group">
-      <label>分类</label>
-      <select id="ideaCategory">
-        <option value="😖 焦虑与压力碎碎念">😖 焦虑与压力碎碎念</option>
-        <option value="💡 奇思妙想与灵感">💡 奇思妙想与灵感</option>
-        <option value="📌 待办与改进事项">📌 待办与改进事项</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>倾倒你的想法：</label>
-      <textarea id="ideaText" rows="4" placeholder="写下你脑子里的所有杂念..."></textarea>
-    </div>
-    
-    <button class="btn-submit" onclick="saveIdeaData()">保存碎碎念并打卡</button>
-    <button class="btn-ai" onclick="generateAIPrompt()">🤖 一键复制“AI 联网诊断 Prompt”</button>
-    <button class="btn-cancel" onclick="closeModal('ideaModal')">取消</button>
-  </div>
-</div>
-
-<!-- 04 商务韩语 SM2 卡片弹窗 -->
-<div id="koreanModal" class="modal hidden">
-  <div class="modal-content">
-    <div class="modal-title">🗣️ 商务韩语 · SM2 记忆卡片</div>
-    
-    <div id="reviewCardArea">
-      <div class="flashcard" onclick="flipCard()">
-        <button class="btn-tts" onclick="speakKorean(event)">🔊</button>
-        <span class="flashcard-tag" id="cardTag">会议邮件</span>
-        <div class="flashcard-korean" id="cardKorean">회의 자료를 미리 검토해 주시기 바랍니다.</div>
-        <div class="flashcard-chinese hidden" id="cardChinese">请提前查阅会议资料。</div>
-        <div style="font-size:10px; color:#94a3b8; margin-top:8px;" id="flipHint">点击卡片翻看中文翻译</div>
-      </div>
-
-      <div class="sm2-btns hidden" id="sm2Btns">
-        <button class="btn-sm2 btn-again" onclick="answerSM2(1)">忘记 (1天)</button>
-        <button class="btn-sm2 btn-hard" onclick="answerSM2(2)">模糊 (按比例)</button>
-        <button class="btn-sm2 btn-good" onclick="answerSM2(3)">记得 (延长)</button>
-      </div>
-    </div>
-
-    <hr style="border:none; border-top:1px solid #e2e8f0; margin:12px 0;">
-    
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-      <span style="font-size:11px; font-weight:bold; color:#0f172a;">➕ 增加卡片：</span>
-      <button onclick="toggleBatchImport()" style="background:none; border:none; color:var(--accent-purple); font-size:11px; font-weight:bold; cursor:pointer;">[批量复制导入]</button>
-    </div>
-
-    <div id="singleAddArea">
-      <div class="form-group"><input type="text" id="newKorean" placeholder="韩文例句"></div>
-      <div class="form-group"><input type="text" id="newChinese" placeholder="中文翻译"></div>
-      <div class="form-group" style="display:flex; gap:6px;">
-        <input type="text" id="newTag" placeholder="场景标签 (如: 会议/邮件)" style="flex:1;">
-        <button onclick="addNewKoreanCard()" style="background:var(--primary); color:#fff; border:none; border-radius:8px; padding:0 10px; font-size:11px; font-weight:bold; cursor:pointer;">添加</button>
-      </div>
-    </div>
-
-    <div id="batchAddArea" class="hidden">
-      <div class="form-group">
-        <textarea id="batchInput" rows="3" placeholder="格式每行：韩语,中文,标签&#10;例如：&#10;감사합니다.,谢谢。,社交&#10;잠시만요.,请稍等。,电话"></textarea>
-      </div>
-      <button onclick="importBatchKorean()" style="width:100%; background:var(--accent-purple); color:#fff; border:none; border-radius:8px; padding:6px; font-size:11px; font-weight:bold; cursor:pointer;">解析并批量导入</button>
-    </div>
-
-    <button class="btn-submit" style="background:#059669;" onclick="markKoreanChecked()">打卡今日语言学习</button>
-    <button class="btn-cancel" onclick="closeModal('koreanModal')">关闭</button>
-  </div>
+<div class="nav-bar">
+  <button class="nav-btn active" id="navBtnAdd" onclick="switchPage('add')">💸 又花钱？</button>
+  <button class="nav-btn" id="navBtnList" onclick="switchPage('list')">📦 所有物品</button>
 </div>
 
 <script>
-  function getTodayKey() { return new Date().toISOString().slice(0, 10); }
+  document.getElementById('purchaseDate').valueAsDate = new Date();
 
-  function triggerVibrate() {
-    if ('vibrate' in navigator) navigator.vibrate(25);
+  function getItems() {
+    return JSON.parse(localStorage.getItem('sqdj_items') || '[]');
   }
 
-  // 核心数据结构
-  function getData() {
-    return JSON.parse(localStorage.getItem('yan_yu_os_data') || JSON.stringify({
-      dailyChecks: {},
-      healthLogs: {},
-      foodLibrary: ["美式咖啡", "水煮蛋", "燕麦奶", "沙拉"],
-      ideas: [],
-      savings: [{ id: '1', name: '商务韩语课程', price: 1200, count: 8 }],
-      transactions: [
-        { id: 't1', title: '外卖餐饮', amount: -35.5, date: getTodayKey() },
-        { id: 't2', title: '日常交通', amount: -12.0, date: getTodayKey() }
-      ],
-      savingsGoal: { target: 50000, current: 12000 },
-      koreanCards: [
-        { id: '1', korean: '회의 자료를 미리 검토해 주시기 바랍니다.', chinese: '请提前查阅会议资料。', tag: '邮件/会议', interval: 1, ease: 2.5, nextReview: getTodayKey() },
-        { id: '2', korean: '이번 프로젝트의 일정을 확인하고 싶습니다.', chinese: '我想确认一下这次项目的日程。', tag: '谈判/沟通', interval: 1, ease: 2.5, nextReview: getTodayKey() }
-      ]
-    }));
-  }
-
-  function saveData(data) {
-    localStorage.setItem('yan_yu_os_data', JSON.stringify(data));
+  function saveStorage(items) {
+    localStorage.setItem('sqdj_items', JSON.stringify(items));
     render();
   }
 
-  // 四季主题
-  function applySeasonTheme() {
-    const month = new Date().getMonth() + 1;
-    const tag = document.getElementById('seasonTag');
-    if (month >= 3 && month <= 5) {
-      document.documentElement.style.setProperty('--map-bg', 'linear-gradient(180deg, #fbcfe8 0%, #fef08a 100%)');
-      tag.innerText = '🌸 春日漫游';
-    } else if (month >= 6 && month <= 8) {
-      document.documentElement.style.setProperty('--map-bg', 'linear-gradient(180deg, #e0f2fe 0%, #dcfce7 100%)');
-      tag.innerText = '🌿 夏日溪谷';
-    } else if (month >= 9 && month <= 11) {
-      document.documentElement.style.setProperty('--map-bg', 'linear-gradient(180deg, #fef3c7 0%, #ffedd5 100%)');
-      tag.innerText = '🍁 枫林秋色';
+  // 页面切换控制
+  function switchPage(page) {
+    if (page === 'add') {
+      document.getElementById('pageAdd').classList.remove('hidden');
+      document.getElementById('pageList').classList.add('hidden');
+      document.getElementById('navBtnAdd').classList.add('active');
+      document.getElementById('navBtnList').classList.remove('active');
     } else {
-      document.documentElement.style.setProperty('--map-bg', 'linear-gradient(180deg, #e0e7ff 0%, #f1f5f9 100%)');
-      tag.innerText = '❄️ 暖冬积雪';
+      document.getElementById('pageAdd').classList.add('hidden');
+      document.getElementById('pageList').classList.remove('hidden');
+      document.getElementById('navBtnAdd').classList.remove('active');
+      document.getElementById('navBtnList').classList.add('active');
     }
   }
 
-  /* 01 省钱大计 & 自动记账 & 存钱目标 */
-  function openSavingsModal() {
-    triggerVibrate();
-    document.getElementById('savingsModal').classList.remove('hidden');
-    renderSavingsList();
-    renderTransactions();
-    updateGoalProgress();
-  }
+  // 新增或修改物品
+  function saveItem() {
+    const editId = document.getElementById('editId').value;
+    const name = document.getElementById('name').value.trim();
+    const category = document.getElementById('category').value;
+    const price = parseFloat(document.getElementById('price').value) || 0;
+    const count = parseInt(document.getElementById('count').value) || 1;
+    const purchaseDate = document.getElementById('purchaseDate').value;
 
-  function switchSavingsTab(tab) {
-    triggerVibrate();
-    ['Cost', 'Auto', 'Goal'].forEach(t => {
-      document.getElementById(`subTab${t}`).classList.add('hidden');
-      document.getElementById(`tab${t}`).classList.remove('active');
-    });
-    const cap = tab.charAt(0).toUpperCase() + tab.slice(1);
-    document.getElementById(`subTab${cap}`).classList.remove('hidden');
-    document.getElementById(`tab${cap}`).classList.add('active');
-  }
-
-  function addSavingsItem() {
-    const name = document.getElementById('itemName').value.trim();
-    const price = parseFloat(document.getElementById('itemPrice').value);
-    const count = parseInt(document.getElementById('itemCount').value) || 1;
-
-    if (name && price > 0) {
-      const data = getData();
-      data.savings.push({ id: Date.now().toString(), name, price, count });
-      saveData(data);
-      document.getElementById('itemName').value = '';
-      document.getElementById('itemPrice').value = '';
-      renderSavingsList();
+    if (!name || price <= 0) {
+      alert('请填写真实的名称和价格！');
+      return;
     }
+
+    let items = getItems();
+
+    if (editId) {
+      // 修改模式
+      const item = items.find(i => i.id == editId);
+      if (item) {
+        item.name = name;
+        item.category = category;
+        item.price = price;
+        item.count = count;
+        item.purchaseDate = purchaseDate;
+      }
+    } else {
+      // 新增模式
+      const newItem = { id: Date.now(), name, category, price, count, purchaseDate };
+      items.push(newItem);
+      // 首次添加时，自动按照“单次成本”从低到高排序
+      items.sort((a, b) => (a.price / a.count) - (b.price / b.count));
+    }
+
+    saveStorage(items);
+    resetForm();
+    switchPage('list'); // 保存后自动切换到所有物品列表
   }
 
-  function incSavingsCount(id) {
-    triggerVibrate();
-    const data = getData();
-    const item = data.savings.find(s => s.id === id);
+  // 编辑加载回填数据
+  function editItem(id) {
+    const item = getItems().find(i => i.id === id);
+    if (!item) return;
+
+    document.getElementById('editId').value = item.id;
+    document.getElementById('name').value = item.name;
+    document.getElementById('category').value = item.category;
+    document.getElementById('price').value = item.price;
+    document.getElementById('count').value = item.count;
+    document.getElementById('purchaseDate').value = item.purchaseDate;
+
+    document.getElementById('formTitle').innerText = '✏️ 修改物品数据';
+    document.getElementById('btnSave').innerText = '保存修改';
+    document.getElementById('btnCancel').classList.remove('hidden');
+
+    switchPage('add');
+  }
+
+  function resetForm() {
+    document.getElementById('editId').value = '';
+    document.getElementById('name').value = '';
+    document.getElementById('price').value = '';
+    document.getElementById('count').value = '1';
+    document.getElementById('purchaseDate').valueAsDate = new Date();
+
+    document.getElementById('formTitle').innerText = '💸 记录一笔新消费';
+    document.getElementById('btnSave').innerText = '保存记录';
+    document.getElementById('btnCancel').classList.add('hidden');
+  }
+
+  // 打卡 +1
+  function useItem(id) {
+    const items = getItems();
+    const item = items.find(i => i.id === id);
     if (item) {
       item.count += 1;
-      saveData(data);
-      renderSavingsList();
+      saveStorage(items);
     }
   }
 
-  function renderSavingsList() {
-    const data = getData();
-    const list = document.getElementById('savingsList');
-    list.innerHTML = data.savings.map(s => {
-      const costPerUse = (s.price / s.count).toFixed(1);
-      const isReturned = costPerUse <= 10;
+  // 排序手动上移 / 下移
+  function moveItem(index, direction) {
+    const items = getItems();
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+    
+    // 交换位置
+    const temp = items[index];
+    items[index] = items[targetIndex];
+    items[targetIndex] = temp;
+
+    saveStorage(items);
+  }
+
+  // 删除
+  function deleteItem(id) {
+    if (confirm('确定要删除吗？')) {
+      const items = getItems().filter(i => i.id !== id);
+      saveStorage(items);
+    }
+  }
+
+  // 渲染页面
+  function render() {
+    const items = getItems();
+    const listEl = document.getElementById('itemList');
+
+    let totalSpent = 0;
+    items.forEach(i => totalSpent += i.price);
+
+    document.getElementById('totalSpent').innerText = '￥' + totalSpent.toFixed(2);
+    document.getElementById('totalCount').innerText = items.length;
+
+    if (items.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center; color:#999; margin-top:30px;">暂无物品，点击“又花钱？”添加第一笔记录吧！</div>';
+      return;
+    }
+
+    listEl.innerHTML = items.map((item, idx) => {
+      const avgCost = (item.price / item.count).toFixed(2);
       return `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:${isReturned ? '#f0fdf4' : '#f8fafc'}; border:${isReturned ? '1px solid #bbf7d0' : 'none'}; padding:6px 10px; border-radius:8px; margin-bottom:4px; font-size:11px;">
-          <div><b>${s.name}</b> <span style="color:#64748b;">(￥${s.price})</span> ${isReturned ? '🎉' : ''}</div>
-          <div>
-            <span style="color:${isReturned ? '#15803d' : '#059669'}; font-weight:bold;">单次: ￥${costPerUse}</span>
-            <button onclick="incSavingsCount('${s.id}')" style="margin-left:6px; background:#10b981; color:#fff; border:none; border-radius:6px; padding:2px 6px; font-size:10px; cursor:pointer;">已用 ${s.count} 次 (+1)</button>
+        <div class="card item-card">
+          <div class="item-info">
+            <div class="item-name">${item.name}<span class="item-tag">${item.category}</span></div>
+            <div class="item-sub">原价 ￥${item.price.toFixed(2)} | 已用 ${item.count} 次</div>
+            <div class="item-sub" style="font-size:10px; color:#aaa;">购入：${item.purchaseDate}</div>
+          </div>
+          <div class="item-cost">
+            <div class="cost-num">￥${avgCost}</div>
+            <div class="cost-unit">单次成本</div>
+          </div>
+          <div class="action-btns">
+            <button class="btn-sm btn-use" onclick="useItem(${item.id})">+1</button>
+            <button class="btn-sm btn-edit" onclick="editItem(${item.id})">✏️</button>
+            <div style="display:flex; gap:2px;">
+              <button class="btn-sm btn-move" onclick="moveItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>⬆️</button>
+              <button class="btn-sm btn-move" onclick="moveItem(${idx}, 1)" ${idx === items.length - 1 ? 'disabled' : ''}>⬇️</button>
+            </div>
+            <button class="btn-sm btn-del" onclick="deleteItem(${item.id})">删除</button>
           </div>
         </div>
       `;
     }).join('');
   }
 
-  /* 自动解析账单文本 */
-  function parseAutoPay() {
-    triggerVibrate();
-    const text = document.getElementById('autoPayText').value.trim();
-    if (!text) return;
-
-    // 正则提取数字（金额）
-    const matchAmount = text.match(/(\d+(\.\d{1,2})?)/);
-    const amount = matchAmount ? parseFloat(matchAmount[0]) : 0;
-
-    let title = "日常消费";
-    if (text.includes("餐饮") || text.includes("外卖") || text.includes("饭") || text.includes("咖啡")) title = "餐饮美食";
-    else if (text.includes("打车") || text.includes("地铁") || text.includes("出行")) title = "交通出行";
-    else if (text.includes("超市") || text.includes("网购") || text.includes("买")) title = "购物消费";
-
-    if (amount > 0) {
-      const data = getData();
-      data.transactions.unshift({ id: Date.now().toString(), title: `${title} (${text.slice(0, 10)}...)`, amount: -amount, date: getTodayKey() });
-      
-      // 同步扣减现有储蓄
-      data.savingsGoal.current = Math.max(0, data.savingsGoal.current - amount);
-      saveData(data);
-
-      document.getElementById('autoPayText').value = '';
-      renderTransactions();
-      updateGoalProgress();
-      alert(`✅ 自动解析成功！成功记录支出 ￥${amount} 元。`);
-    } else {
-      alert("⚠️ 未能在文本中解析出有效金额，请直接输入如：买咖啡 28");
-    }
-  }
-
-  function renderTransactions() {
-    const data = getData();
-    const list = document.getElementById('transactionList');
-    list.innerHTML = (data.transactions || []).map(t => `
-      <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:6px 10px; border-radius:8px; margin-bottom:4px; font-size:11px;">
-        <div><b>${t.title}</b> <span style="color:#94a3b8; font-size:9px;">${t.date}</span></div>
-        <div style="font-weight:bold; color:${t.amount < 0 ? '#ef4444' : '#10b981'};">${t.amount < 0 ? '' : '+'}${t.amount} 元</div>
-      </div>
-    `).join('');
-  }
-
-  /* 存钱目标与进度 */
-  function updateGoalProgress() {
-    const data = getData();
-    const target = parseFloat(document.getElementById('savingsGoalInput').value) || data.savingsGoal.target;
-    const current = parseFloat(document.getElementById('currentSavingsInput').value) || data.savingsGoal.current;
-
-    data.savingsGoal = { target, current };
-    localStorage.setItem('yan_yu_os_data', JSON.stringify(data));
-
-    const remaining = Math.max(0, target - current);
-    const percent = Math.min(100, Math.round((current / target) * 100));
-
-    document.getElementById('goalPercent').innerText = `${percent}%`;
-    document.getElementById('goalBarFill').style.width = `${percent}%`;
-    document.getElementById('remainingGoalText').innerText = `🎯 距离目标还差：￥${remaining.toFixed(1)} 元`;
-  }
-
-  /* 开源节流智能建议 */
-  function generateFinancialAdvice() {
-    triggerVibrate();
-    const data = getData();
-    const remaining = data.savingsGoal.target - data.savingsGoal.current;
-
-    let advice = `🎯 <b>存钱冲刺诊断：</b><br>`;
-    advice += `• 距离目标还差 <b>￥${remaining} 元</b>。<br><br>`;
-    
-    advice += `💡 <b>提升收入（开源思路）：</b><br>`;
-    advice += `1. <b>韩语副业变现</b>：充分利用你的商务韩语积累，承接韩语 PCB 资料翻译、中韩商务陪同或外贸对接；<br>`;
-    advice += `2. <b>职场专长</b>：精进 MI 流程与工厂工程能力，冲刺年度绩效与专项提成。<br><br>`;
-
-    advice += `✂️ <b>建议少买（节流建议）：</b><br>`;
-    advice += `1. <b>高频微小支出</b>：减少外卖与每日咖啡频次（尝试自带或用咖啡机），预计每月省 ￥300~500；<br>`;
-    advice += `2. <b>低利用率大件</b>：购买新设备/课程前，先在“单次成本”列表核算，确保预期使用次数 > 30 次再下单。`;
-
-    document.getElementById('financialAdviceArea').innerHTML = advice;
-  }
-
-  function markSavingsChecked() {
-    toggleCheck('省钱大计', true);
-    closeModal('savingsModal');
-  }
-
-  /* 02 身体与睡眠 */
-  function calculateSleep() {
-    const start = document.getElementById('sleepStart').value;
-    const end = document.getElementById('sleepEnd').value;
-    if (!start || !end) return;
-
-    let [h1, m1] = start.split(':').map(Number);
-    let [h2, m2] = end.split(':').map(Number);
-    let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
-    if (diff < 0) diff += 24 * 60;
-    
-    const hours = (diff / 60).toFixed(1);
-    document.getElementById('sleepDurationText').innerText = `😴 预计睡眠时长：${hours} 小时`;
-
-    let advice = hours < 7 ? "⚠️ 睡眠不足 7 小时：建议午间休养 15 分钟，补充水分。" : "✨ 睡眠时长达标：身体电量充沛！";
-    document.getElementById('adviceContainer').innerHTML = "💡 <b>定制建议：</b><br>" + advice;
-  }
-
-  function openHealthModal() { 
-    triggerVibrate();
-    document.getElementById('healthModal').classList.remove('hidden');
-    renderFoodTags();
-    calculateSleep();
-  }
-
-  function renderFoodTags() {
-    const data = getData();
-    const container = document.getElementById('foodTagContainer');
-    container.innerHTML = data.foodLibrary.map(food => 
-      `<span class="food-tag" onclick="appendFood('${food}')">+ ${food}</span>`
-    ).join('');
-  }
-
-  function appendFood(foodName) {
-    triggerVibrate();
-    const input = document.getElementById('foodInput');
-    let current = input.value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
-    if (!current.includes(foodName)) {
-      current.push(foodName);
-      input.value = current.join(', ');
-    }
-  }
-
-  function saveHealthData() {
-    const data = getData();
-    const today = getTodayKey();
-    if (!data.dailyChecks[today]) data.dailyChecks[today] = {};
-
-    const rawInput = document.getElementById('foodInput').value;
-    const foods = rawInput.split(/[,，]/).map(s => s.trim()).filter(Boolean);
-    foods.forEach(f => { if (!data.foodLibrary.includes(f)) data.foodLibrary.push(f); });
-
-    data.healthLogs[today] = {
-      start: document.getElementById('sleepStart').value,
-      end: document.getElementById('sleepEnd').value,
-      foods: foods,
-      period: document.getElementById('periodStatus').value,
-      symptom: document.getElementById('bodySymptom').value
-    };
-    data.dailyChecks[today]['身体状态'] = true;
-
-    saveData(data);
-    closeModal('healthModal');
-    triggerBounce();
-  }
-
-  /* 03 闪念与 AI 分析 */
-  function openIdeaModal() { triggerVibrate(); document.getElementById('ideaModal').classList.remove('hidden'); }
-  
-  function saveIdeaData() {
-    const text = document.getElementById('ideaText').value.trim();
-    if (text) {
-      const data = getData();
-      const today = getTodayKey();
-      if (!data.dailyChecks[today]) data.dailyChecks[today] = {};
-
-      data.ideas.push({ date: today, category: document.getElementById('ideaCategory').value, text: text });
-      data.dailyChecks[today]['闪念抽屉'] = true;
-
-      saveData(data);
-    }
-    closeModal('ideaModal');
-    triggerBounce();
-  }
-
-  function generateAIPrompt() {
-    const text = document.getElementById('ideaText').value.trim();
-    const data = getData();
-    const today = getTodayKey();
-    const health = data.healthLogs[today] || {};
-
-    const prompt = `你是我的人生地图 AI 导师。这是我（颜雨）今天的状态与碎碎念：\n\n` +
-      `1. 睡眠与身体：入睡 ${health.start || '未填'}，起床 ${health.end || '未填'}，生理期：${health.period || '无'}，体感：${health.symptom || '无特别'}\n` +
-      `2. 饮食记录：${(health.foods || []).join('、') || '未记录'}\n` +
-      `3. 碎碎念/焦虑源：[${document.getElementById('ideaCategory').value}] ${text || '（暂未填写）'}\n\n` +
-      `请帮我：1) 分析当前心理成因；2) 联网搜索解决方案；3) 输出 3 个今日最小行动项（Micro-actions）。`;
-
-    navigator.clipboard.writeText(prompt).then(() => {
-      alert("✅ 已复制 AI 诊断 Prompt！直接发给 AI 即可！");
-    });
-  }
-
-  /* 04 商务韩语 TTS 与批量导入 */
-  let currentCardIndex = 0;
-
-  function openKoreanModal() {
-    triggerVibrate();
-    document.getElementById('koreanModal').classList.remove('hidden');
-    loadKoreanCard();
-  }
-
-  function speakKorean(e) {
-    e.stopPropagation();
-    const text = document.getElementById('cardKorean').innerText;
-    if ('speechSynthesis' in window && text) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ko-KR';
-      window.speechSynthesis.speak(utterance);
-    }
-  }
-
-  function loadKoreanCard() {
-    const data = getData();
-    if (data.koreanCards.length === 0) {
-      document.getElementById('cardKorean').innerText = "暂无卡片，请在下方添加或批量导入！";
-      document.getElementById('cardChinese').innerText = "";
-      return;
-    }
-    const card = data.koreanCards[currentCardIndex % data.koreanCards.length];
-    document.getElementById('cardTag').innerText = card.tag || '商务韩语';
-    document.getElementById('cardKorean').innerText = card.korean;
-    document.getElementById('cardChinese').innerText = card.chinese;
-    document.getElementById('cardChinese').classList.add('hidden');
-    document.getElementById('sm2Btns').classList.add('hidden');
-    document.getElementById('flipHint').classList.remove('hidden');
-  }
-
-  function flipCard() {
-    triggerVibrate();
-    document.getElementById('cardChinese').classList.remove('hidden');
-    document.getElementById('sm2Btns').classList.remove('hidden');
-    document.getElementById('flipHint').classList.add('hidden');
-  }
-
-  function answerSM2(grade) {
-    triggerVibrate();
-    const data = getData();
-    const card = data.koreanCards[currentCardIndex % data.koreanCards.length];
-    
-    if (grade === 1) card.interval = 1;
-    else if (grade === 2) card.interval = Math.max(1, Math.round(card.interval * 1.2));
-    else card.interval = Math.max(2, Math.round(card.interval * card.ease));
-    
-    saveData(data);
-    currentCardIndex++;
-    loadKoreanCard();
-  }
-
-  function toggleBatchImport() {
-    document.getElementById('singleAddArea').classList.toggle('hidden');
-    document.getElementById('batchAddArea').classList.toggle('hidden');
-  }
-
-  function importBatchKorean() {
-    const text = document.getElementById('batchInput').value.trim();
-    if (!text) return;
-
-    const lines = text.split('\n');
-    const data = getData();
-    let count = 0;
-
-    lines.forEach(line => {
-      const parts = line.split(/[,，]/);
-      if (parts.length >= 2) {
-        data.koreanCards.push({
-          id: Date.now().toString() + Math.random().toString().slice(2,5),
-          korean: parts[0].trim(),
-          chinese: parts[1].trim(),
-          tag: parts[2] ? parts[2].trim() : '商务场景',
-          interval: 1, ease: 2.5, nextReview: getTodayKey()
-        });
-        count++;
-      }
-    });
-
-    saveData(data);
-    alert(`✅ 成功批量解析导入 ${count} 条卡片！`);
-    document.getElementById('batchInput').value = '';
-    toggleBatchImport();
-    loadKoreanCard();
-  }
-
-  function addNewKoreanCard() {
-    const kor = document.getElementById('newKorean').value.trim();
-    const chi = document.getElementById('newChinese').value.trim();
-    const tag = document.getElementById('newTag').value.trim() || '商务场景';
-
-    if (kor && chi) {
-      const data = getData();
-      data.koreanCards.push({
-        id: Date.now().toString(), korean: kor, chinese: chi, tag: tag,
-        interval: 1, ease: 2.5, nextReview: getTodayKey()
-      });
-      saveData(data);
-      document.getElementById('newKorean').value = '';
-      document.getElementById('newChinese').value = '';
-      alert('✅ 录入成功！');
-      loadKoreanCard();
-    }
-  }
-
-  function markKoreanChecked() {
-    toggleCheck('语言学习', true);
-    closeModal('koreanModal');
-  }
-
-  /* 视图切换与成就墙 */
-  function switchView(view) {
-    triggerVibrate();
-    if (view === 'today') {
-      document.getElementById('viewToday').classList.remove('hidden');
-      document.getElementById('viewHistory').classList.add('hidden');
-      document.getElementById('navToday').classList.add('active');
-      document.getElementById('navHistory').classList.remove('active');
-    } else {
-      document.getElementById('viewToday').classList.add('hidden');
-      document.getElementById('viewHistory').classList.remove('hidden');
-      document.getElementById('navToday').classList.remove('active');
-      document.getElementById('navHistory').classList.add('active');
-      renderHistory();
-      renderBadges();
-    }
-  }
-
-  function renderBadges() {
-    const data = getData();
-    const daysCount = Object.keys(data.dailyChecks).length;
-    const cardsCount = data.koreanCards.length;
-    const maxUse = Math.max(...data.savings.map(s => s.count), 0);
-
-    const badges = [
-      { name: "启程者", icon: "🌱", unlocked: daysCount >= 1, desc: "完成首次打卡" },
-      { name: "习惯养成", icon: "🔥", unlocked: daysCount >= 7, desc: "打卡满 7 天" },
-      { name: "省钱达人", icon: "💰", unlocked: maxUse >= 10, desc: "单物使用 10 次" },
-      { name: "词汇积累", icon: "🗣️", unlocked: cardsCount >= 10, desc: "韩语卡片达 10 条" },
-      { name: "电量满格", icon: "⚡", unlocked: daysCount >= 14, desc: "打卡满 14 天" },
-      { name: " Life OS 专家", icon: "👑", unlocked: daysCount >= 30, desc: "打卡满 30 天" }
-    ];
-
-    document.getElementById('badgeGrid').innerHTML = badges.map(b => `
-      <div class="badge-item ${b.unlocked ? 'unlocked' : ''}">
-        <div class="badge-icon">${b.icon}</div>
-        <div class="badge-name">${b.name}</div>
-      </div>
-    `).join('');
-  }
-
-  function toggleCheck(nodeName, forceValue) {
-    triggerVibrate();
-    const data = getData();
-    const today = getTodayKey();
-    if (!data.dailyChecks[today]) data.dailyChecks[today] = {};
-    
-    data.dailyChecks[today][nodeName] = forceValue !== undefined ? forceValue : !data.dailyChecks[today][nodeName];
-    saveData(data);
-    if (data.dailyChecks[today][nodeName]) triggerBounce();
-  }
-
-  function renderHistory() {
-    const data = getData();
-    const container = document.getElementById('historyList');
-    const dates = Object.keys(data.dailyChecks).sort().reverse();
-
-    if (dates.length === 0) {
-      container.innerHTML = "<div style='color:#94a3b8;'>还没有历史记录，从今天开始积累吧！</div>";
-      return;
-    }
-
-    container.innerHTML = dates.map(d => {
-      const health = data.healthLogs[d] || {};
-      const dayIdeas = data.ideas.filter(i => i.date === d);
-      return `
-        <div class="history-card">
-          <div class="history-date">🗓️ ${d}</div>
-          <div><b>🌙 睡眠：</b>${health.start || '--'} ~ ${health.end || '--'}</div>
-          <div><b>🥗 饮食：</b>${(health.foods || []).join(', ') || '未记录'}</div>
-          <div><b>🌸 体感：</b>${health.period || '无特别'} | ${health.symptom || '无'}</div>
-          ${dayIdeas.length ? `<div><b>💡 闪念：</b>${dayIdeas.map(i => i.text).join('；')}</div>` : ''}
-        </div>
-      `;
-    }).join('');
-
-    renderChart(dates.slice(0, 7).reverse(), data);
-  }
-
-  function renderChart(dates, data) {
-    const ctx = document.getElementById('sleepChart').getContext('2d');
-    const durations = dates.map(d => {
-      const h = data.healthLogs[d];
-      if (!h || !h.start || !h.end) return 0;
-      let [h1, m1] = h.start.split(':').map(Number);
-      let [h2, m2] = h.end.split(':').map(Number);
-      let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
-      if (diff < 0) diff += 24 * 60;
-      return (diff / 60).toFixed(1);
-    });
-
-    if (window.mySleepChart) window.mySleepChart.destroy();
-    window.mySleepChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: dates,
-        datasets: [{
-          label: '睡眠时长 (小时)',
-          data: durations,
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: { scales: { y: { beginAtZero: true, max: 12 } }, plugins: { legend: { display: false } } }
-    });
-  }
-
-  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-  function triggerBounce() {
-    triggerVibrate();
-    const avatar = document.getElementById('userAvatar');
-    avatar.classList.add('bounce');
-    setTimeout(() => avatar.classList.remove('bounce'), 600);
-  }
-
-  function render() {
-    const data = getData();
-    const today = getTodayKey();
-    const checks = data.dailyChecks[today] || {};
-    const nodes = ['省钱大计', '身体状态', '闪念抽屉', '语言学习'];
-    let count = 0;
-
-    nodes.forEach(node => {
-      const card = document.getElementById(`card-${node}`);
-      const desc = document.getElementById(`desc-${node}`);
-      if (checks[node]) {
-        card.classList.add('active');
-        desc.innerText = "✅ 今日已打卡点亮！";
-        count++;
-      } else {
-        card.classList.remove('active');
-      }
-    });
-
-    const avatar = document.getElementById('userAvatar');
-    if (count === nodes.length && nodes.length > 0) {
-      avatar.classList.add('dance');
-      document.getElementById('speechBubble').innerText = "🎉 哇！今天的四座地图地标全被颜雨解锁啦！";
-    } else {
-      avatar.classList.remove('dance');
-    }
-  }
-
+  // 导出数据 JSON 文件
   function exportData() {
-    const blob = new Blob([JSON.stringify(getData(), null, 2)], { type: 'application/json' });
+    const items = getItems();
+    if (items.length === 0) return alert('当前没有可导出的数据！');
+    const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `一言一语_颜雨地图数据_${getTodayKey()}.json`;
+    a.download = `省钱大计数据备份_${new Date().toISOString().slice(0,10)}.json`;
     a.click();
   }
 
-  function importData(e) {
-    const file = e.target.files[0];
+  // 导入数据 JSON 文件
+  function importData(event) {
+    const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = function(e) {
       try {
-        saveData(JSON.parse(evt.target.result));
-        alert('导入成功！');
-      } catch (err) { alert('文件无效！'); }
+        const importedItems = JSON.parse(e.target.result);
+        if (Array.isArray(importedItems)) {
+          if (confirm('导入将同步并保存备份数据，确定继续吗？')) {
+            saveStorage(importedItems);
+            alert('数据导入成功！');
+          }
+        }
+      } catch (err) {
+        alert('文件格式不正确，导入失败！');
+      }
     };
     reader.readAsText(file);
   }
 
-  // 初始化
-  applySeasonTheme();
   render();
 </script>
+
 </body>
 </html>
