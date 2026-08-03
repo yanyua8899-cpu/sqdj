@@ -23,8 +23,6 @@
       --accent-purple: #6366f1;
       --text-dark: #1e293b;
       --text-muted: #64748b;
-      
-      /* 四季主题变量（由 JS 动态切换） */
       --map-bg: linear-gradient(180deg, #e0f2fe 0%, #dcfce7 50%, #fef3c7 100%);
     }
 
@@ -121,6 +119,10 @@
     .btn-ai { width: 100%; padding: 10px; background: var(--accent-purple); color: #fff; border: none; border-radius: 12px; font-weight: bold; font-size: 12px; cursor: pointer; margin-top: 6px; }
     .btn-cancel { width: 100%; padding: 8px; background: #f1f5f9; color: #64748b; border: none; border-radius: 10px; font-size: 11px; cursor: pointer; margin-top: 6px; }
 
+    /* 进度条组件 */
+    .progress-bar-bg { background: #e2e8f0; border-radius: 10px; height: 12px; overflow: hidden; width: 100%; margin: 6px 0; }
+    .progress-bar-fill { background: linear-gradient(90deg, #10b981, #059669); height: 100%; width: 0%; transition: width 0.5s ease; }
+
     /* 商务韩语卡片 */
     .flashcard {
       background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -143,6 +145,8 @@
     .history-date { font-weight: bold; color: #0f172a; font-size: 12px; margin-bottom: 4px; }
 
     .hidden { display: none !important; }
+    .tab-btn { flex:1; padding:6px; font-size:11px; border:none; background:#f1f5f9; color:#64748b; font-weight:bold; border-radius:8px; cursor:pointer; }
+    .tab-btn.active { background:var(--primary); color:#fff; }
   </style>
 </head>
 <body>
@@ -168,13 +172,13 @@
       </div>
 
       <div class="landmark-list">
-        <!-- 01 省钱大计 -->
+        <!-- 01 省钱大计与存钱规划 -->
         <div class="landmark-card" id="card-省钱大计" onclick="openSavingsModal()">
           <div class="landmark-badge">01</div>
           <span class="landmark-icon">💰</span>
           <div class="landmark-info">
-            <div class="landmark-title">省钱大计 (Cost-per-use)</div>
-            <div class="landmark-desc" id="desc-省钱大计">计算单次使用成本，理性消费</div>
+            <div class="landmark-title">省钱大计 & 自动记账</div>
+            <div class="landmark-desc" id="desc-省钱大计">单次成本计算 + 存钱目标 + 智能分析</div>
           </div>
         </div>
 
@@ -240,31 +244,86 @@
   </div>
 </div>
 
-<!-- 01 省钱大计弹窗 -->
+<!-- 01 省钱大计 & 自动记账 & 存钱目标 弹窗 -->
 <div id="savingsModal" class="modal hidden">
   <div class="modal-content">
-    <div class="modal-title">💰 省钱大计 · 单次成本计算器</div>
-    <div class="form-group">
-      <label>新增物品/课程名称</label>
-      <input type="text" id="itemName" placeholder="如：胶囊咖啡机、韩语外教课...">
-    </div>
-    <div class="form-group" style="display:flex; gap:8px;">
-      <div style="flex:1;">
-        <label>价格 (元)</label>
-        <input type="number" id="itemPrice" placeholder="0.00">
-      </div>
-      <div style="flex:1;">
-        <label>已使用次数</label>
-        <input type="number" id="itemCount" value="1">
-      </div>
-    </div>
-    <button class="btn-submit" onclick="addSavingsItem()">添加物品并记账</button>
-    
-    <hr style="border:none; border-top:1px solid #e2e8f0; margin:12px 0;">
-    <div style="font-size:11px; font-weight:bold; color:#475569; margin-bottom:6px;">📦 已录入物品单次成本（点击 +1 算回本）：</div>
-    <div id="savingsList" style="max-height:160px; overflow-y:auto;"></div>
+    <div class="modal-title">💰 省钱大计 & 存钱目标</div>
 
-    <button class="btn-submit" style="background:#059669;" onclick="markSavingsChecked()">点亮今日省钱地标</button>
+    <!-- 顶部 Tab 切换 -->
+    <div style="display:flex; gap:4px; margin-bottom:12px;">
+      <button class="tab-btn active" id="tabCost" onclick="switchSavingsTab('cost')">单次成本 (Cost-per-use)</button>
+      <button class="tab-btn" id="tabAuto" onclick="switchSavingsTab('auto')">智能记账</button>
+      <button class="tab-btn" id="tabGoal" onclick="switchSavingsTab('goal')">存钱与 AI 建议</button>
+    </div>
+
+    <!-- Tab 1: 单次成本计算器 -->
+    <div id="subTabCost">
+      <div class="form-group">
+        <label>新增物品/课程名称</label>
+        <input type="text" id="itemName" placeholder="如：胶囊咖啡机、韩语外教课...">
+      </div>
+      <div class="form-group" style="display:flex; gap:8px;">
+        <div style="flex:1;">
+          <label>价格 (元)</label>
+          <input type="number" id="itemPrice" placeholder="0.00">
+        </div>
+        <div style="flex:1;">
+          <label>已使用次数</label>
+          <input type="number" id="itemCount" value="1">
+        </div>
+      </div>
+      <button class="btn-submit" onclick="addSavingsItem()">添加物品并记账</button>
+      
+      <hr style="border:none; border-top:1px solid #e2e8f0; margin:12px 0;">
+      <div style="font-size:11px; font-weight:bold; color:#475569; margin-bottom:6px;">📦 已录入物品（点击“+1”自动摊薄成本）：</div>
+      <div id="savingsList" style="max-height:160px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- Tab 2: 智能/文本粘贴自动记账 -->
+    <div id="subTabAuto" class="hidden">
+      <div class="form-group">
+        <label>📋 自动识别记账（粘贴微信/支付宝账单文本）</label>
+        <textarea id="autoPayText" rows="3" placeholder="例如粘贴：微信支付：已向外卖商家付款 35.50 元&#10;或者直接写：买咖啡 28"></textarea>
+      </div>
+      <button class="btn-submit" style="background:var(--accent-purple);" onclick="parseAutoPay()">🤖 自动解析并记录账单</button>
+
+      <hr style="border:none; border-top:1px solid #e2e8f0; margin:12px 0;">
+      <div style="font-size:11px; font-weight:bold; color:#475569; margin-bottom:6px;">🧾 最近收支记录：</div>
+      <div id="transactionList" style="max-height:140px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- Tab 3: 存钱目标与开源节流 AI 建议 -->
+    <div id="subTabGoal" class="hidden">
+      <div class="form-group" style="display:flex; gap:8px;">
+        <div style="flex:1;">
+          <label>我的存钱目标金额 (元)</label>
+          <input type="number" id="savingsGoalInput" value="50000" onchange="updateGoalProgress()">
+        </div>
+        <div style="flex:1;">
+          <label>现有储蓄/结余 (元)</label>
+          <input type="number" id="currentSavingsInput" value="12000" onchange="updateGoalProgress()">
+        </div>
+      </div>
+
+      <!-- 存钱进度条 -->
+      <div style="font-size:11px; font-weight:bold; color:#0f172a; margin-top:4px;">
+        🎯 存钱进度：<span id="goalPercent">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="goalBarFill"></div>
+      </div>
+      <div style="font-size:11px; color:#059669; font-weight:bold;" id="remainingGoalText">距离目标还差：￥0</div>
+
+      <hr style="border:none; border-top:1px solid #e2e8f0; margin:12px 0;">
+
+      <!-- 开源节流 AI 动态建议 -->
+      <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:10px; font-size:11px; color:#166534;" id="financialAdviceArea">
+        💡 点击下面按钮，生成专属开源节流建议...
+      </div>
+      <button class="btn-ai" onclick="generateFinancialAdvice()">💡 生成针对性开源节流建议</button>
+    </div>
+
+    <button class="btn-submit" style="background:#059669; margin-top:12px;" onclick="markSavingsChecked()">点亮今日省钱地标</button>
     <button class="btn-cancel" onclick="closeModal('savingsModal')">关闭</button>
   </div>
 </div>
@@ -343,7 +402,6 @@
   <div class="modal-content">
     <div class="modal-title">🗣️ 商务韩语 · SM2 记忆卡片</div>
     
-    <!-- 学习卡片 -->
     <div id="reviewCardArea">
       <div class="flashcard" onclick="flipCard()">
         <button class="btn-tts" onclick="speakKorean(event)">🔊</button>
@@ -362,7 +420,6 @@
 
     <hr style="border:none; border-top:1px solid #e2e8f0; margin:12px 0;">
     
-    <!-- 单条添加 & 批量导入 -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
       <span style="font-size:11px; font-weight:bold; color:#0f172a;">➕ 增加卡片：</span>
       <button onclick="toggleBatchImport()" style="background:none; border:none; color:var(--accent-purple); font-size:11px; font-weight:bold; cursor:pointer;">[批量复制导入]</button>
@@ -392,7 +449,6 @@
 <script>
   function getTodayKey() { return new Date().toISOString().slice(0, 10); }
 
-  // 触觉反馈
   function triggerVibrate() {
     if ('vibrate' in navigator) navigator.vibrate(25);
   }
@@ -405,6 +461,11 @@
       foodLibrary: ["美式咖啡", "水煮蛋", "燕麦奶", "沙拉"],
       ideas: [],
       savings: [{ id: '1', name: '商务韩语课程', price: 1200, count: 8 }],
+      transactions: [
+        { id: 't1', title: '外卖餐饮', amount: -35.5, date: getTodayKey() },
+        { id: 't2', title: '日常交通', amount: -12.0, date: getTodayKey() }
+      ],
+      savingsGoal: { target: 50000, current: 12000 },
       koreanCards: [
         { id: '1', korean: '회의 자료를 미리 검토해 주시기 바랍니다.', chinese: '请提前查阅会议资料。', tag: '邮件/会议', interval: 1, ease: 2.5, nextReview: getTodayKey() },
         { id: '2', korean: '이번 프로젝트의 일정을 확인하고 싶습니다.', chinese: '我想确认一下这次项目的日程。', tag: '谈判/沟通', interval: 1, ease: 2.5, nextReview: getTodayKey() }
@@ -417,12 +478,10 @@
     render();
   }
 
-  // 四季动态地图背景设置
+  // 四季主题
   function applySeasonTheme() {
     const month = new Date().getMonth() + 1;
-    const board = document.getElementById('mapBoard');
     const tag = document.getElementById('seasonTag');
-
     if (month >= 3 && month <= 5) {
       document.documentElement.style.setProperty('--map-bg', 'linear-gradient(180deg, #fbcfe8 0%, #fef08a 100%)');
       tag.innerText = '🌸 春日漫游';
@@ -438,11 +497,24 @@
     }
   }
 
-  /* 01 省钱大计 */
+  /* 01 省钱大计 & 自动记账 & 存钱目标 */
   function openSavingsModal() {
     triggerVibrate();
     document.getElementById('savingsModal').classList.remove('hidden');
     renderSavingsList();
+    renderTransactions();
+    updateGoalProgress();
+  }
+
+  function switchSavingsTab(tab) {
+    triggerVibrate();
+    ['Cost', 'Auto', 'Goal'].forEach(t => {
+      document.getElementById(`subTab${t}`).classList.add('hidden');
+      document.getElementById(`tab${t}`).classList.remove('active');
+    });
+    const cap = tab.charAt(0).toUpperCase() + tab.slice(1);
+    document.getElementById(`subTab${cap}`).classList.remove('hidden');
+    document.getElementById(`tab${cap}`).classList.add('active');
   }
 
   function addSavingsItem() {
@@ -476,16 +548,97 @@
     const list = document.getElementById('savingsList');
     list.innerHTML = data.savings.map(s => {
       const costPerUse = (s.price / s.count).toFixed(1);
+      const isReturned = costPerUse <= 10;
       return `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:6px 10px; border-radius:8px; margin-bottom:4px; font-size:11px;">
-          <div><b>${s.name}</b> <span style="color:#64748b;">(￥${s.price})</span></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:${isReturned ? '#f0fdf4' : '#f8fafc'}; border:${isReturned ? '1px solid #bbf7d0' : 'none'}; padding:6px 10px; border-radius:8px; margin-bottom:4px; font-size:11px;">
+          <div><b>${s.name}</b> <span style="color:#64748b;">(￥${s.price})</span> ${isReturned ? '🎉' : ''}</div>
           <div>
-            <span style="color:#059669; font-weight:bold;">单次: ￥${costPerUse}</span>
+            <span style="color:${isReturned ? '#15803d' : '#059669'}; font-weight:bold;">单次: ￥${costPerUse}</span>
             <button onclick="incSavingsCount('${s.id}')" style="margin-left:6px; background:#10b981; color:#fff; border:none; border-radius:6px; padding:2px 6px; font-size:10px; cursor:pointer;">已用 ${s.count} 次 (+1)</button>
           </div>
         </div>
       `;
     }).join('');
+  }
+
+  /* 自动解析账单文本 */
+  function parseAutoPay() {
+    triggerVibrate();
+    const text = document.getElementById('autoPayText').value.trim();
+    if (!text) return;
+
+    // 正则提取数字（金额）
+    const matchAmount = text.match(/(\d+(\.\d{1,2})?)/);
+    const amount = matchAmount ? parseFloat(matchAmount[0]) : 0;
+
+    let title = "日常消费";
+    if (text.includes("餐饮") || text.includes("外卖") || text.includes("饭") || text.includes("咖啡")) title = "餐饮美食";
+    else if (text.includes("打车") || text.includes("地铁") || text.includes("出行")) title = "交通出行";
+    else if (text.includes("超市") || text.includes("网购") || text.includes("买")) title = "购物消费";
+
+    if (amount > 0) {
+      const data = getData();
+      data.transactions.unshift({ id: Date.now().toString(), title: `${title} (${text.slice(0, 10)}...)`, amount: -amount, date: getTodayKey() });
+      
+      // 同步扣减现有储蓄
+      data.savingsGoal.current = Math.max(0, data.savingsGoal.current - amount);
+      saveData(data);
+
+      document.getElementById('autoPayText').value = '';
+      renderTransactions();
+      updateGoalProgress();
+      alert(`✅ 自动解析成功！成功记录支出 ￥${amount} 元。`);
+    } else {
+      alert("⚠️ 未能在文本中解析出有效金额，请直接输入如：买咖啡 28");
+    }
+  }
+
+  function renderTransactions() {
+    const data = getData();
+    const list = document.getElementById('transactionList');
+    list.innerHTML = (data.transactions || []).map(t => `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:6px 10px; border-radius:8px; margin-bottom:4px; font-size:11px;">
+        <div><b>${t.title}</b> <span style="color:#94a3b8; font-size:9px;">${t.date}</span></div>
+        <div style="font-weight:bold; color:${t.amount < 0 ? '#ef4444' : '#10b981'};">${t.amount < 0 ? '' : '+'}${t.amount} 元</div>
+      </div>
+    `).join('');
+  }
+
+  /* 存钱目标与进度 */
+  function updateGoalProgress() {
+    const data = getData();
+    const target = parseFloat(document.getElementById('savingsGoalInput').value) || data.savingsGoal.target;
+    const current = parseFloat(document.getElementById('currentSavingsInput').value) || data.savingsGoal.current;
+
+    data.savingsGoal = { target, current };
+    localStorage.setItem('yan_yu_os_data', JSON.stringify(data));
+
+    const remaining = Math.max(0, target - current);
+    const percent = Math.min(100, Math.round((current / target) * 100));
+
+    document.getElementById('goalPercent').innerText = `${percent}%`;
+    document.getElementById('goalBarFill').style.width = `${percent}%`;
+    document.getElementById('remainingGoalText').innerText = `🎯 距离目标还差：￥${remaining.toFixed(1)} 元`;
+  }
+
+  /* 开源节流智能建议 */
+  function generateFinancialAdvice() {
+    triggerVibrate();
+    const data = getData();
+    const remaining = data.savingsGoal.target - data.savingsGoal.current;
+
+    let advice = `🎯 <b>存钱冲刺诊断：</b><br>`;
+    advice += `• 距离目标还差 <b>￥${remaining} 元</b>。<br><br>`;
+    
+    advice += `💡 <b>提升收入（开源思路）：</b><br>`;
+    advice += `1. <b>韩语副业变现</b>：充分利用你的商务韩语积累，承接韩语 PCB 资料翻译、中韩商务陪同或外贸对接；<br>`;
+    advice += `2. <b>职场专长</b>：精进 MI 流程与工厂工程能力，冲刺年度绩效与专项提成。<br><br>`;
+
+    advice += `✂️ <b>建议少买（节流建议）：</b><br>`;
+    advice += `1. <b>高频微小支出</b>：减少外卖与每日咖啡频次（尝试自带或用咖啡机），预计每月省 ￥300~500；<br>`;
+    advice += `2. <b>低利用率大件</b>：购买新设备/课程前，先在“单次成本”列表核算，确保预期使用次数 > 30 次再下单。`;
+
+    document.getElementById('financialAdviceArea').innerHTML = advice;
   }
 
   function markSavingsChecked() {
@@ -876,7 +1029,7 @@
     reader.readAsText(file);
   }
 
-  // 初始化调用
+  // 初始化
   applySeasonTheme();
   render();
 </script>
